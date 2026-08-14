@@ -2,7 +2,7 @@
 
 一款面向个人用户的**跨平台本地记账桌面应用**（Windows / macOS）。以简洁、直观的方式记录日常收支，通过一级 + 二级分类体系清晰掌握资金流向。所有数据保存在本机 SQLite 数据库中，无需联网，注重隐私。
 
-> 项目代号：KunPengBook · 当前版本：v1.2.0
+> 项目代号：KunPengBook · 当前版本：v1.3.0
 
 ---
 
@@ -13,6 +13,7 @@
 - **明细列表**：按时间倒序展示，支持按日期范围、分类筛选，按备注关键词搜索，可编辑 / 删除记录
 - **统计看板**：总支出、日均支出、分类占比图表（ECharts 柱状 / 饼图），按月查看
 - **数据管理**：导出 CSV / JSON 备份文件；本地数据库位置一目了然
+- **2048 小游戏**：内置休闲小游戏，支持键盘手动玩、**AI 自动玩**（可暂停/继续/停止）与 **AI 自我测试**（10 局统计达标率，实测 8/10 局超过 1024 分），最高分本地保存
 - **隐私优先**：数据纯本地存储，无任何网络请求
 
 ## 界面预览
@@ -21,9 +22,11 @@
 | --- | --- | --- |
 | ![仪表盘](prototype/preview/app-dashboard.png) | ![记一笔](prototype/preview/app-add.png) | ![明细](prototype/preview/app-list.png) |
 
-| 统计 | 分类管理 | 收入录入 |
+| 统计 | 分类管理 | 2048 小游戏 |
 | --- | --- | --- |
-| ![统计](prototype/preview/app-stats.png) | ![分类管理](prototype/preview/app-cats.png) | ![收入录入](prototype/preview/app-add-income.png) |
+| ![统计](prototype/preview/app-stats.png) | ![分类管理](prototype/preview/app-cats.png) | ![2048 小游戏](prototype/preview/app-game2048.png) |
+
+> 记账界面预览：收入录入见 `prototype/preview/app-add-income.png`。
 
 ## 技术栈
 
@@ -95,6 +98,7 @@ npm start
 | --- | --- | --- |
 | `v1.0.0` | `d92615d` | 鲲鹏记账 v1.0 初始版本（Electron + Vue 3 + SQLite） |
 | `v1.2.0` | `8bc50dc` | 分类自定义管理 + 收入逻辑修正 + 安装包体积优化 |
+| `v1.3.0` | `0f6ec41` | 集成 2048 小游戏（AI 自动玩 / 自我测试）+ 代码审查修复 |
 
 ## Git 分支与协作约定
 
