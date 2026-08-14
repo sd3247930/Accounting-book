@@ -7,6 +7,7 @@ import RecordsView from './views/RecordsView.vue'
 import StatsView from './views/StatsView.vue'
 import DataView from './views/DataView.vue'
 import CategoriesView from './views/CategoriesView.vue'
+import Game2048View from './views/Game2048View.vue'
 
 const navs = [
   { key: 'dashboard', ico: '📊', label: '仪表盘' },
@@ -14,7 +15,8 @@ const navs = [
   { key: 'list', ico: '📋', label: '明细' },
   { key: 'stats', ico: '📈', label: '统计' },
   { key: 'data', ico: '🗄️', label: '数据管理' },
-  { key: 'cats', ico: '🏷️', label: '分类管理' }
+  { key: 'cats', ico: '🏷️', label: '分类管理' },
+  { key: 'game2048', ico: '🎮', label: '2048' }
 ]
 
 const search = computed({
@@ -66,6 +68,7 @@ function monthLabel() {
         <StatsView v-else-if="store.view === 'stats'" />
         <DataView v-else-if="store.view === 'data'" />
         <CategoriesView v-else-if="store.view === 'cats'" />
+        <Game2048View v-else-if="store.view === 'game2048'" />
       </div>
     </div>
   </div>

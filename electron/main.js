@@ -237,6 +237,11 @@ async function runShotTest() {
       await win.webContents.executeJavaScript(`document.querySelector('.content')?.scrollTo(0, document.querySelector('.content')?.scrollHeight || 0)`)
       await sleep(400)
       await shot('app-cats-bottom.png')
+      await win.webContents.executeJavaScript(`document.querySelector('.content')?.scrollTo(0, 0)`)
+      await sleep(200)
+      await win.webContents.executeJavaScript(`document.querySelector('.nav-item[data-view="game2048"]')?.click()`)
+      await sleep(1000)
+      await shot('app-game2048.png')
       console.log('SHOT_OK')
       app.exit(0)
     } catch (e) {
