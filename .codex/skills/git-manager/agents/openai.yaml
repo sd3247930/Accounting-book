@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git版本管理助手"
+  short_description: "管理Git版本控制：初始化仓库、提交代码、查看状态与回滚版本"
+  default_prompt: "提交代码"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "打包体积优化"
+  short_description: "分析Electron打包配置，诊断体积膨胀原因并优化生成新安装包"
+  default_prompt: "优化打包"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "代码审查专家"
+  short_description: "对项目核心源码执行完整代码审查，输出带优先级与修复建议的详细报告"
+  default_prompt: "审查代码"

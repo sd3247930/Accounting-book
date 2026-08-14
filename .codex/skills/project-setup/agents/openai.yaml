@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目环境初始化"
+  short_description: "检测Node.js与npm环境，安装项目全部依赖并配置开发环境"
+  default_prompt: "初始化项目"

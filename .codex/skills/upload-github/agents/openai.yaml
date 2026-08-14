@@ -1,0 +1,4 @@
+interface:
+  display_name: "一键发布GitHub"
+  short_description: "将当前项目完整上传至GitHub远程仓库，支持新建或关联已有仓库"
+  default_prompt: "上传到GitHub"

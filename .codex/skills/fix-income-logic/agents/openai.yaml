@@ -1,0 +1,4 @@
+interface:
+  display_name: "收入逻辑修正"
+  short_description: "修正记账应用中收入与支出数据结构及界面显示逻辑一致问题"
+  default_prompt: "修复收入逻辑"

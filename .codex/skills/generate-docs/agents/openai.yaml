@@ -1,0 +1,4 @@
+interface:
+  display_name: "文档自动生成"
+  short_description: "扫描当前代码结构，同步更新产品设计文档与功能说明内容"
+  default_prompt: "生成文档"
