@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鲲鹏记账 · 界面原型 v1.0</title>
+<style>
+  :root {
+    --bg: #F7F3E8;
+    --bg-sidebar: #FDFAF2;
+    --surface: #FFFFFF;
+    --primary: #4A5AA8;
+    --primary-dark: #3F4D93;
+    --primary-soft: #E8EBF6;
+    --accent: #F2C14E;
+    --success: #4BCBA4;
+    --success-text: #1E7A55;
+    --danger: #E15A5A;
+    --danger-text: #C24444;
+    --text-1: #333333;
+    --text-2: #666666;
+    --text-3: #8A8A8A;
+    --divider: #EDE7D8;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --shadow: 0 4px 16px rgba(74, 90, 168, 0.08);
+    --font: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    --num: 'DIN Alternate', 'Inter', 'PingFang SC', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-1);
+    font-size: 15px;
+    min-height: 100vh;
+  }
+  .app { display: flex; min-height: 100vh; }
+
+  /* ========== 侧边栏 ========== */
+  .sidebar {
+    width: 208px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--divider);
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
+  .logo-badge {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #6C6CDB);
+    color: #fff; font-size: 22px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-text b { font-size: 17px; display: block; }
+  .logo-text span { font-size: 12px; color: var(--text-3); }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 12px;
+    color: var(--text-2); cursor: pointer; user-select: none;
+    transition: all .18s cubic-bezier(.33,1,.68,1);
+    border: none; background: transparent; font-size: 15px; font-family: var(--font);
+  }
+  .nav-item:hover { background: #F4EFE0; color: var(--text-1); }
+  .nav-item.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+  .nav-item .ico { font-size: 18px; width: 22px; text-align: center; }
+  .sidebar .spacer { flex: 1; }
+  .version { font-size: 12px; color: var(--text-3); padding: 8px 14px; }
+
+  /* ========== 主区域 ========== */
+  .main { flex: 1; min-width: 0; }
+  .topbar {
+    height: 64px; padding: 0 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .month-pill {
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: 999px; padding: 8px 16px; font-weight: 600; color: var(--text-1);
+    box-shadow: var(--shadow); cursor: pointer; font-family: var(--font);
+  }
+  .search {
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: 999px; padding: 8px 16px; min-width: 220px;
+  }
+  .search input { border: none; outline: none; background: transparent; font-size: 14px; width: 100%; font-family: var(--font); }
+  .btn {
+    border: none; border-radius: 999px; padding: 9px 18px;
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font);
+    transition: all .18s cubic-bezier(.33,1,.68,1);
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-ghost { background: var(--surface); color: var(--primary); border: 1px solid var(--primary); }
+  .btn-ghost:hover { background: var(--primary-soft); }
+
+  .content { padding: 8px 28px 32px; }
+  .view { display: none; animation: fadeIn .28s cubic-bezier(.33,1,.68,1); }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow); padding: 20px 24px;
+  }
+  .card-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+  .card-sub { font-size: 13px; color: var(--text-3); font-weight: 400; margin-left: 8px; }
+
+  /* 首页统计卡 */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+  .stat { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px 20px; }
+  .stat .label { color: var(--text-2); font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .stat .ico-round {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .stat .value { font-family: var(--num); font-size: 26px; font-weight: 700; margin-top: 8px; }
+  .stat .delta { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+
+  .two-col { display: grid; grid-template-columns: 5fr 7fr; gap: 16px; margin-bottom: 16px; }
+
+  /* 环形图 */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; }
+  .donut {
+    width: 168px; height: 168px; border-radius: 50%;
+    background: conic-gradient(
+      #EECB7D 0 30%,
+      #64A2EC 30% 48%,
+      #E75C5C 48% 70%,
+      #B292E2 70% 82%,
+      #EFA562 82% 92%,
+      #9B9588 92% 100%
+    );
+    position: relative; flex-shrink: 0;
+  }
+  .donut::after {
+    content: ""; position: absolute; inset: 22px; border-radius: 50%; background: #fff;
+  }
+  .donut-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 1;
+  }
+  .donut-center small { color: var(--text-3); font-size: 12px; }
+  .donut-center b { font-family: var(--num); font-size: 22px; }
+  .legend { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 4px; }
+  .legend-item .amt { margin-left: auto; font-family: var(--num); color: var(--text-1); font-weight: 600; }
+
+  /* 柱状图 */
+  .bars { display: flex; align-items: flex-end; gap: 12px; height: 180px; padding-top: 10px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .bar {
+    width: 70%; border-radius: 8px 8px 4px 4px;
+    background: var(--primary); opacity: .75; transition: all .24s;
+    position: relative;
+  }
+  .bar-col:hover .bar { opacity: 1; }
+  .bar.hot { background: var(--accent); opacity: 1; }
+  .bar-col .month { font-size: 12px; color: var(--text-3); }
+
+  /* 最近记录 */
+  .row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 4px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: var(--bg-sidebar); border-radius: 12px; padding-left: 12px; padding-right: 12px; }
+  .cat-icon {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .row .mid { flex: 1; min-width: 0; }
+  .row .mid b { display: block; font-size: 15px; }
+  .row .mid span { font-size: 12px; color: var(--text-3); }
+  .row .right { text-align: right; }
+  .row .right .amt { font-family: var(--num); font-size: 17px; font-weight: 700; }
+  .amt.expense { color: var(--danger-text); }
+  .amt.income { color: var(--success-text); }
+  .row .right .date { font-size: 12px; color: var(--text-3); }
+
+  /* 记一笔 */
+  .amount-box {
+    display: flex; align-items: baseline; gap: 6px;
+    border: 2px solid var(--divider); border-radius: var(--radius-md);
+    padding: 16px 20px; margin-bottom: 18px; transition: border-color .2s;
+  }
+  .amount-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+  .amount-box .yen { font-size: 22px; font-weight: 700; color: var(--text-2); }
+  .amount-box input {
+    border: none; outline: none; font-family: var(--num); font-size: 34px; font-weight: 700;
+    width: 100%; background: transparent; color: var(--text-1);
+  }
+  .field-label { font-size: 13px; color: var(--text-2); margin: 14px 0 8px; font-weight: 600; }
+  .cat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .cat-cell {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 12px 6px; border-radius: var(--radius-md); border: 2px solid transparent;
+    cursor: pointer; font-size: 13px; color: var(--text-1); transition: all .18s;
+  }
+  .cat-cell:hover { transform: translateY(-1px); }
+  .cat-cell.selected { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px var(--primary-soft); }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    padding: 7px 16px; border-radius: 999px; border: 1px solid var(--divider);
+    background: var(--surface); cursor: pointer; font-size: 14px; color: var(--text-1);
+    transition: all .18s; font-family: var(--font);
+  }
+  .pill:hover { border-color: var(--primary); color: var(--primary); }
+  .pill.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .form-input, .form-area {
+    width: 100%; border: 2px solid var(--divider); border-radius: var(--radius-md);
+    padding: 12px 14px; font-size: 14px; font-family: var(--font); outline: none;
+    background: var(--surface); color: var(--text-1);
+  }
+  .form-input:focus, .form-area:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+  .form-area { resize: vertical; min-height: 64px; }
+  .action-row { display: flex; gap: 12px; margin-top: 20px; }
+
+  /* 明细筛选 */
+  .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .select {
+    border: 1px solid var(--divider); border-radius: 999px; padding: 8px 14px;
+    background: var(--surface); font-size: 14px; color: var(--text-1); font-family: var(--font); outline: none;
+  }
+  .row-actions { display: flex; gap: 6px; }
+  .mini-btn {
+    border: none; background: transparent; cursor: pointer; font-size: 13px;
+    padding: 4px 8px; border-radius: 8px; color: var(--text-2); font-family: var(--font);
+  }
+  .mini-btn:hover { background: var(--primary-soft); color: var(--primary); }
+  .mini-btn.danger:hover { background: #FBE9E9; color: var(--danger-text); }
+
+  /* 统计页 */
+  .rank-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--divider); }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-row .name { width: 90px; font-size: 14px; font-weight: 600; }
+  .track { flex: 1; height: 8px; border-radius: 999px; background: #EFEDE7; overflow: hidden; }
+  .track i { display: block; height: 100%; border-radius: 999px; }
+  .rank-row .amt { font-family: var(--num); font-weight: 700; font-size: 15px; width: 90px; text-align: right; }
+  .rank-row .pct { width: 44px; text-align: right; font-size: 12px; color: var(--text-3); }
+
+  /* 数据管理 */
+  .util-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .util { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 22px 24px; }
+  .util .ico { font-size: 28px; }
+  .util b { display: block; margin: 10px 0 4px; font-size: 16px; }
+  .util p { font-size: 13px; color: var(--text-2); margin-bottom: 14px; line-height: 1.6; }
+
+  .foot { text-align: center; color: var(--text-3); font-size: 12px; padding: 18px 0 28px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-badge">鲲</div>
+      <div class="logo-text"><b>鲲鹏记账</b><span>治愈系 · 本地记账</span></div>
+    </div>
+    <button class="nav-item active" data-view="dashboard"><span class="ico">📊</span>仪表盘</button>
+    <button class="nav-item" data-view="add"><span class="ico">✍️</span>记一笔</button>
+    <button class="nav-item" data-view="list"><span class="ico">📋</span>明细</button>
+    <button class="nav-item" data-view="stats"><span class="ico">📈</span>统计</button>
+    <button class="nav-item" data-view="data"><span class="ico">🗄️</span>数据管理</button>
+    <div class="spacer"></div>
+    <div class="version">原型 v1.0 · 2026-08-14</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="month-pill">‹ 2026年8月 ›</button>
+      <div class="search"><span>🔍</span><input placeholder="搜索备注 / 分类…"></div>
+      <button class="btn btn-ghost">⬇ 导出</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== 仪表盘 ========== -->
+      <section class="view active" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="label"><span class="ico-round" style="background:#FADFDC">🍱</span>本月总支出</div>
+            <div class="value" style="color:var(--danger-text)">¥1,286.50</div>
+            <div class="delta">较上月 ↓ 8.2%</div>
+          </div>
+          <div class="stat">
+            <div class="label"><span class="ico-round" style="background:#DBF2EB">💰</span>本月总收入</div>
+            <div class="value" style="color:var(--success-text)">¥3,520.00</div>
+            <div class="delta">结余 ¥2,233.50</div>
+          </div>
+          <div class="stat">
+            <div class="label"><span class="ico-round" style="background:#E8EBF6">🧾</span>本月笔数</div>
+            <div class="value">42 笔</div>
+            <div class="delta">日均 1.6 笔</div>
+          </div>
+          <div class="stat">
+            <div class="label"><span class="ico-round" style="background:#FAF2D9">🌤️</span>日均支出</div>
+            <div class="value">¥41.5</div>
+            <div class="delta">预算内 ✅</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">分类占比<span class="card-sub">8 月支出构成</span></div>
+            <div class="donut-wrap">
+              <div class="donut">
+                <div class="donut-center"><small>总支出</small><b>¥1,286.5</b></div>
+              </div>
+              <div class="legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#EECB7D"></span>餐饮<span class="amt">¥386</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#64A2EC"></span>交通<span class="amt">¥232</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#E75C5C"></span>购物<span class="amt">¥283</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#B292E2"></span>娱乐<span class="amt">¥154</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#EFA562"></span>居住<span class="amt">¥129</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#9B9588"></span>其他<span class="amt">¥103</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">月度趋势<span class="card-sub">近 6 个月支出</span></div>
+            <div class="bars">
+              <div class="bar-col"><div class="bar" style="height:46%"></div><span class="month">3月</span></div>
+              <div class="bar-col"><div class="bar" style="height:58%"></div><span class="month">4月</span></div>
+              <div class="bar-col"><div class="bar" style="height:52%"></div><span class="month">5月</span></div>
+              <div class="bar-col"><div class="bar" style="height:70%"></div><span class="month">6月</span></div>
+              <div class="bar-col"><div class="bar" style="height:64%"></div><span class="month">7月</span></div>
+              <div class="bar-col"><div class="bar hot" style="height:82%"></div><span class="month">8月</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">最近记录</div>
+          <div class="row"><span class="cat-icon" style="background:#FAF2D9">🍜</span><div class="mid"><b>餐饮 · 午餐</b><span>公司楼下面馆</span></div><div class="right"><div class="amt expense">-¥25.00</div><div class="date">08-14 12:30</div></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DDE8F8">🚌</span><div class="mid"><b>交通 · 公交地铁</b><span>通勤</span></div><div class="right"><div class="amt expense">-¥4.00</div><div class="date">08-14 08:10</div></div></div>
+          <div class="row"><span class="cat-icon" style="background:#E8E0F4">🎬</span><div class="mid"><b>娱乐 · 电影/演出</b><span>和朋友看电影</span></div><div class="right"><div class="amt expense">-¥45.00</div><div class="date">08-13 19:00</div></div></div>
+          <div class="row"><span class="cat-icon" style="background:#FADFDC">🛍️</span><div class="mid"><b>购物 · 服饰鞋包</b><span>夏季T恤</span></div><div class="right"><div class="amt expense">-¥189.00</div><div class="date">08-13 15:20</div></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DBF2EB">💊</span><div class="mid"><b>医疗 · 药品购买</b><span>感冒药</span></div><div class="right"><div class="amt expense">-¥36.50</div><div class="date">08-12 10:05</div></div></div>
+        </div>
+      </section>
+
+      <!-- ========== 记一笔 ========== -->
+      <section class="view" id="view-add">
+        <div class="card" style="max-width:760px">
+          <div class="card-title">记一笔<span class="card-sub">金额 · 分类 · 备注</span></div>
+          <div class="amount-box"><span class="yen">¥</span><input id="amount" type="text" inputmode="decimal" placeholder="0.00" value=""></div>
+
+          <div class="field-label">一级分类</div>
+          <div class="cat-grid" id="catGrid"></div>
+
+          <div class="field-label">二级分类</div>
+          <div class="pill-row" id="subRow"></div>
+
+          <div class="field-label">日期（默认今天）</div>
+          <input class="form-input" type="text" value="2026-08-14（周五）">
+
+          <div class="field-label">备注（选填）</div>
+          <textarea class="form-area" placeholder="例如：和同事聚餐…"></textarea>
+
+          <div class="action-row">
+            <button class="btn btn-primary" style="padding:11px 34px">保存</button>
+            <button class="btn btn-ghost">取消</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 明细 ========== -->
+      <section class="view" id="view-list">
+        <div class="card">
+          <div class="card-title">明细<span class="card-sub">42 笔记录</span></div>
+          <div class="filter-bar">
+            <select class="select"><option>全部日期</option><option>今天</option><option>本周</option><option>本月</option><option>自定义…</option></select>
+            <select class="select"><option>全部一级分类</option><option>餐饮</option><option>交通</option><option>购物</option><option>娱乐</option><option>居住</option><option>通讯</option><option>医疗</option><option>教育</option><option>人情</option><option>投资</option><option>其他</option></select>
+            <select class="select"><option>全部二级分类</option></select>
+            <div class="search" style="min-width:180px"><span>🔍</span><input placeholder="搜索备注…"></div>
+            <button class="btn btn-ghost" style="margin-left:auto">⬇ 导出 CSV</button>
+          </div>
+
+          <div class="row"><span class="cat-icon" style="background:#FAF2D9">🍜</span><div class="mid"><b>餐饮 · 午餐</b><span>公司楼下面馆</span></div><div class="right"><div class="amt expense">-¥25.00</div><div class="date">08-14</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DDE8F8">🚌</span><div class="mid"><b>交通 · 公交地铁</b><span>通勤</span></div><div class="right"><div class="amt expense">-¥4.00</div><div class="date">08-14</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#E8E0F4">🎬</span><div class="mid"><b>娱乐 · 电影/演出</b><span>和朋友看电影</span></div><div class="right"><div class="amt expense">-¥45.00</div><div class="date">08-13</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#FADFDC">🛍️</span><div class="mid"><b>购物 · 服饰鞋包</b><span>夏季T恤</span></div><div class="right"><div class="amt expense">-¥189.00</div><div class="date">08-13</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DDE8F8">🚕</span><div class="mid"><b>交通 · 打车</b><span>去机场</span></div><div class="right"><div class="amt expense">-¥56.00</div><div class="date">08-12</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DBF2EB">💊</span><div class="mid"><b>医疗 · 药品购买</b><span>感冒药</span></div><div class="right"><div class="amt expense">-¥36.50</div><div class="date">08-12</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#D8F0EC">📱</span><div class="mid"><b>通讯 · 话费充值</b><span></span></div><div class="right"><div class="amt expense">-¥50.00</div><div class="date">08-11</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+          <div class="row"><span class="cat-icon" style="background:#DBF2EB">↩️</span><div class="mid"><b>退款 · 其他</b><span>衣服退货退款</span></div><div class="right"><div class="amt income">+¥89.00</div><div class="date">08-10</div></div><div class="row-actions"><button class="mini-btn">编辑</button><button class="mini-btn danger">删除</button></div></div>
+        </div>
+      </section>
+
+      <!-- ========== 统计 ========== -->
+      <section class="view" id="view-stats">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">支出构成<span class="card-sub">本月</span></div>
+            <div class="donut-wrap">
+              <div class="donut"><div class="donut-center"><small>总支出</small><b>¥1,286.5</b></div></div>
+              <div class="legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#EECB7D"></span>餐饮<span class="amt">¥386</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#64A2EC"></span>交通<span class="amt">¥232</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#E75C5C"></span>购物<span class="amt">¥283</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#B292E2"></span>娱乐<span class="amt">¥154</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#EFA562"></span>居住<span class="amt">¥129</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#9B9588"></span>其他<span class="amt">¥103</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">月度趋势<span class="card-sub">近 6 个月</span></div>
+            <div class="bars">
+              <div class="bar-col"><div class="bar" style="height:46%"></div><span class="month">3月</span></div>
+              <div class="bar-col"><div class="bar" style="height:58%"></div><span class="month">4月</span></div>
+              <div class="bar-col"><div class="bar" style="height:52%"></div><span class="month">5月</span></div>
+              <div class="bar-col"><div class="bar" style="height:70%"></div><span class="month">6月</span></div>
+              <div class="bar-col"><div class="bar" style="height:64%"></div><span class="month">7月</span></div>
+              <div class="bar-col"><div class="bar hot" style="height:82%"></div><span class="month">8月</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">分类排行<span class="card-sub">本月支出 Top 6</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#FAF2D9">🍜</span><span class="name">餐饮</span><div class="track"><i style="width:100%;background:#EECB7D"></i></div><span class="amt">¥386.00</span><span class="pct">30%</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#FADFDC">🛍️</span><span class="name">购物</span><div class="track"><i style="width:73%;background:#E75C5C"></i></div><span class="amt">¥283.00</span><span class="pct">22%</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#DDE8F8">🚌</span><span class="name">交通</span><div class="track"><i style="width:60%;background:#64A2EC"></i></div><span class="amt">¥232.00</span><span class="pct">18%</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#E8E0F4">🎬</span><span class="name">娱乐</span><div class="track"><i style="width:40%;background:#B292E2"></i></div><span class="amt">¥154.00</span><span class="pct">12%</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#FAE7D5">🏠</span><span class="name">居住</span><div class="track"><i style="width:33%;background:#EFA562"></i></div><span class="amt">¥129.00</span><span class="pct">10%</span></div>
+          <div class="rank-row"><span class="cat-icon" style="background:#EFEDE7">📦</span><span class="name">其他</span><div class="track"><i style="width:27%;background:#9B9588"></i></div><span class="amt">¥103.00</span><span class="pct">8%</span></div>
+        </div>
+      </section>
+
+      <!-- ========== 数据管理 ========== -->
+      <section class="view" id="view-data">
+        <div class="util-grid">
+          <div class="util">
+            <div class="ico">📄</div>
+            <b>导出 CSV</b>
+            <p>导出全部记录为 Excel 可直接打开的表格文件，用于备份或分析。</p>
+            <button class="btn btn-primary">导出 CSV</button>
+          </div>
+          <div class="util">
+            <div class="ico">🗂️</div>
+            <b>导出 JSON</b>
+            <p>导出结构化数据文件，便于日后迁移到其他版本或应用。</p>
+            <button class="btn btn-ghost">导出 JSON</button>
+          </div>
+          <div class="util">
+            <div class="ico">💾</div>
+            <b>本地备份</b>
+            <p>数据仅保存在本机，不联网、不上传，你的账本只属于你。</p>
+            <button class="btn btn-ghost">查看数据位置</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">危险操作</div>
+          <p style="color:var(--text-2);font-size:14px;margin-bottom:14px">清空全部记录不可恢复，建议先导出备份。</p>
+          <button class="btn btn-ghost" style="border-color:var(--danger);color:var(--danger-text)">清空全部记录</button>
+        </div>
+      </section>
+
+      <div class="foot">鲲鹏记账 界面原型 v1.0 · 风格来源 PIC 参考图 · 设计规范见 design-system.md</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 侧边栏切换
+  const navs = document.querySelectorAll('.nav-item');
+  const views = document.querySelectorAll('.view');
+  function switchView(name) {
+    navs.forEach(x => x.classList.toggle('active', x.dataset.view === name));
+    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  }
+  navs.forEach(n => n.addEventListener('click', () => {
+    switchView(n.dataset.view);
+    location.hash = n.dataset.view;
+  }));
+  if (location.hash) switchView(location.hash.slice(1));
+
+  // 分类数据
+  const cats = [
+    { name: '餐饮', emoji: '🍜', bg: '#FAF2D9', subs: ['早餐','午餐','晚餐','外卖','零食','饮品','聚餐'] },
+    { name: '交通', emoji: '🚌', bg: '#DDE8F8', subs: ['公交地铁','打车','火车/飞机','加油/充电','停车费','维修保养'] },
+    { name: '购物', emoji: '🛍️', bg: '#FADFDC', subs: ['服饰鞋包','美妆护肤','数码产品','家居用品','书籍文具'] },
+    { name: '娱乐', emoji: '🎬', bg: '#E8E0F4', subs: ['电影/演出','游戏充值','健身运动','旅游度假','宠物消费'] },
+    { name: '居住', emoji: '🏠', bg: '#FAE7D5', subs: ['房租/房贷','水电燃气','物业费','网络宽带','维修家电'] },
+    { name: '通讯', emoji: '📱', bg: '#D8F0EC', subs: ['话费充值','流量套餐'] },
+    { name: '医疗', emoji: '💊', bg: '#DBF2EB', subs: ['药品购买','体检','看病挂号','牙科/眼科'] },
+    { name: '教育', emoji: '📚', bg: '#FCE8F0', subs: ['学费/培训','书籍教材','考试报名'] },
+    { name: '人情', emoji: '🎁', bg: '#FDE4E8', subs: ['红包礼金','请客吃饭','捐助'] },
+    { name: '投资', emoji: '📈', bg: '#E6E8F7', subs: ['理财亏损','股票基金'] },
+    { name: '其他', emoji: '📦', bg: '#EFEDE7', subs: ['杂项','未分类'] }
+  ];
+  let curCat = cats[0];
+
+  const catGrid = document.getElementById('catGrid');
+  const subRow = document.getElementById('subRow');
+
+  function renderCats() {
+    catGrid.innerHTML = '';
+    cats.forEach(c => {
+      const cell = document.createElement('div');
+      cell.className = 'cat-cell' + (c === curCat ? ' selected' : '');
+      cell.innerHTML = '<span class="cat-icon" style="background:' + c.bg + '">' + c.emoji + '</span>' + c.name;
+      cell.addEventListener('click', () => { curCat = c; renderCats(); renderSubs(); });
+      catGrid.appendChild(cell);
+    });
+  }
+  function renderSubs() {
+    subRow.innerHTML = '';
+    curCat.subs.forEach((s, i) => {
+      const p = document.createElement('button');
+      p.className = 'pill' + (i === 0 ? ' selected' : '');
+      p.textContent = s;
+      p.addEventListener('click', () => {
+        subRow.querySelectorAll('.pill').forEach(x => x.classList.remove('selected'));
+        p.classList.add('selected');
+      });
+      subRow.appendChild(p);
+    });
+  }
+  renderCats();
+  renderSubs();
+</script>
+</body>
+</html>
