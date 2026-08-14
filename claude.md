@@ -225,3 +225,32 @@
 
 ### 9.3 待确认事项
 - 界面原型风格经用户确认后，进入数据库设计与核心功能开发阶段。
+
+### 9.4 开发进度（2026-08-14）
+
+**v1.0 已开发完成并验证**
+
+- 技术栈落地：Electron 37 + Vue 3 + Element Plus + SQLite（better-sqlite3）+ ECharts
+- 数据库设计：见 `docs/database-design.md`（分类表 + 记录表 + 索引，11 大类 44 小类种子）
+- 功能完成：
+  - 记账录入：支出/收入切换、金额、一级/二级分类、日期、备注
+  - 明细列表：类型/一级/二级/日期范围筛选、备注搜索、分页、编辑、删除
+  - 统计看板：分类占比环形图、近 6 月趋势柱状图、分类排行
+  - 数据管理：CSV/JSON 导出、数据位置查看、清空（二次确认）
+- 验证结果：
+  - Vite 生产构建通过；Electron 冒烟测试通过；打包产物冒烟测试通过
+  - 界面截图见 `prototype/preview/app-*.png`
+
+**打包说明**
+
+- Windows：本机 NSIS 安装包受杀毒软件实时扫描影响未完成，已交付
+  `release/` 下的 Portable 免安装单文件版（双击即用）与 zip 包
+- macOS：需在 macOS 电脑上执行 `npm run dist:mac`
+
+**运行方式**
+
+```bash
+npm run dev        # 开发模式（热更新）
+npm start          # 生产模式（需先 npm run build）
+release/KunPengBook-1.0.0-x64-Portable.exe   # 免安装直接使用
+```

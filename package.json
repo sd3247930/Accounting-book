@@ -14,6 +14,7 @@
     "start": "electron .",
     "smoke": "electron . --smoke-test",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "electron-builder install-app-deps",
     "dist:win": "npm run build && electron-builder --win",
     "dist:mac": "npm run build && electron-builder --mac"
   },
@@ -36,6 +37,7 @@
   "build": {
     "appId": "com.kunpeng.book",
     "productName": "鲲鹏记账",
+    "artifactName": "KunPengBook-Setup-${version}-${arch}.${ext}",
     "files": [
       "dist/**/*",
       "electron/**/*",
@@ -46,6 +48,8 @@
       "node_modules/better-sqlite3/**/*"
     ],
     "win": {
+      "executableName": "KunPengBook",
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
