@@ -1,7 +1,7 @@
 {
   "name": "kunpeng-book",
   "productName": "鲲鹏记账",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "跨平台本地记账桌面应用（Electron + Vue 3 + Element Plus + SQLite）",
   "main": "electron/main.js",
   "author": "KunPengBook",
@@ -13,6 +13,8 @@
     "build": "vite build",
     "start": "electron .",
     "smoke": "electron . --smoke-test",
+    "migrate:test": "electron scripts/migrate-test.js",
+    "pack:win": "npm run build && electron-builder --win portable zip nsis",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "postinstall": "electron-builder install-app-deps",
     "dist:win": "npm run build && electron-builder --win",
@@ -37,15 +39,31 @@
   "build": {
     "appId": "com.kunpeng.book",
     "productName": "鲲鹏记账",
+    "directories": {
+      "output": "packages"
+    },
+    "compression": "maximum",
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ],
     "artifactName": "KunPengBook-Setup-${version}-${arch}.${ext}",
     "files": [
       "dist/**/*",
       "electron/**/*",
       "shared/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/**",
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*",
+      "!**/*.map",
+      "!**/test/**",
+      "!**/tests/**",
+      "!**/deps/sqlite3/shell.c"
     ],
     "asarUnpack": [
-      "node_modules/better-sqlite3/**/*"
+      "node_modules/better-sqlite3/build/Release/**/*"
     ],
     "win": {
       "executableName": "KunPengBook",
@@ -68,7 +86,11 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "artifactName": "KunPengBook-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "KunPengBook-${version}-${arch}-Portable.${ext}"
     }
   }
 }

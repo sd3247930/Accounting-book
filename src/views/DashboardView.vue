@@ -115,7 +115,13 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
       <div v-if="recent.length === 0" style="color:var(--k-text3);padding:16px 0">还没有记录，点「记一笔」开始吧～</div>
       <div v-for="r in recent" :key="r.id" class="row">
         <span class="ico-round" :style="{ background: catMeta(r.parentName).bg }">{{ catMeta(r.parentName).emoji }}</span>
-        <div class="mid"><b>{{ r.parentName }} · {{ r.categoryName }}</b><span>{{ r.note || '无备注' }}</span></div>
+        <div class="mid">
+          <b>
+            <span v-if="r.type === 'income'" class="income-badge">收入</span>
+            {{ r.type === 'income' ? r.categoryName : r.parentName + ' · ' + r.categoryName }}
+          </b>
+          <span>{{ r.note || '无备注' }}</span>
+        </div>
         <div class="right">
           <div class="amt" :class="r.type === 'expense' ? 'expense' : 'income'">{{ sign(r) }}{{ fmt(r.amount) }}</div>
           <div class="date">{{ r.date }}</div>
@@ -124,3 +130,11 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
     </div>
   </div>
 </template>
+
+<style scoped>
+.income-badge {
+  display: inline-block; margin-right: 6px; padding: 1px 8px;
+  border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: #EFFAF6; color: var(--k-success-text); vertical-align: 1px;
+}
+</style>
