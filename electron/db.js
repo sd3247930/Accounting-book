@@ -207,8 +207,33 @@ function getRecord(id) {
     .get(id)
 }
 
+/**
+ * 记录参数统一校验（数据层最后防线，UI 之外也生效）：
+ * - 类型必须是 expense / income
+ * - 金额必须是大于 0 的有限数字
+ * - 分类必须存在，且必须是二级分类（一级分类不能直接挂记录，
+ *   否则 listRecords/getRecord 的内连接查询会查不到，产生“幽灵记录”）
+ */
+function validateRecordInput({ type, amount, categoryId }) {
+  if (!['expense', 'income'].includes(type)) {
+    throw new Error('记录类型不合法')
+  }
+  const n = Number(amount)
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error('金额必须大于 0')
+  }
+  const cat = getCategory(categoryId)
+  if (!cat) {
+    throw new Error('所选分类不存在')
+  }
+  if (cat.parentId === null) {
+    throw new Error('必须选择二级分类，不能直接使用一级分类')
+  }
+}
+
 /** 新增记录，返回完整记录行 */
 function addRecord({ type, amount, categoryId, date, note }) {
+  validateRecordInput({ type, amount, categoryId })
   const info = db
     .prepare('INSERT INTO records (type, amount, category_id, date, note) VALUES (?, ?, ?, ?, ?)')
     .run(type, amount, categoryId, date, note || '')
@@ -217,6 +242,7 @@ function addRecord({ type, amount, categoryId, date, note }) {
 
 /** 更新记录 */
 function updateRecord(id, { type, amount, categoryId, date, note }) {
+  validateRecordInput({ type, amount, categoryId })
   db.prepare(
     'UPDATE records SET type = ?, amount = ?, category_id = ?, date = ?, note = ? WHERE id = ?'
   ).run(type, amount, categoryId, date, note || '', id)
@@ -246,7 +272,12 @@ function listRecords(f = {}) {
   if (startDate) { where.push('r.date >= ?'); params.push(startDate) }
   if (endDate) { where.push('r.date <= ?'); params.push(endDate) }
   if (catId) { where.push('(c.id = ? OR c.parent_id = ?)'); params.push(catId, catId) }
-  if (keyword) { where.push('r.note LIKE ?'); params.push('%' + keyword + '%') }
+  if (keyword) {
+    // 转义 LIKE 通配符（% _ \），避免搜索词被当作模式
+    const kw = String(keyword).replace(/[%_\\]/g, (m) => '\\' + m)
+    where.push("r.note LIKE ? ESCAPE '\\'")
+    params.push('%' + kw + '%')
+  }
   if (type && type !== 'all') { where.push('r.type = ?'); params.push(type) }
 
   const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : ''
@@ -280,8 +311,8 @@ function monthStats(month) {
   const totals = db
     .prepare(
       `SELECT
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS expense,
-         COALESCE(SUM(CASE WHEN type = 'income'  THEN amount END), 0) AS income,
+         COALESCE(ROUND(SUM(CASE WHEN type = 'expense' THEN amount END), 2), 0) AS expense,
+         COALESCE(ROUND(SUM(CASE WHEN type = 'income'  THEN amount END), 2), 0) AS income,
          COUNT(*) AS count
        FROM records
        WHERE substr(date, 1, 7) = ?`
@@ -290,7 +321,7 @@ function monthStats(month) {
 
   const byCategory = db
     .prepare(
-      `SELECT p.id AS categoryId, p.name AS name, SUM(r.amount) AS amount
+      `SELECT p.id AS categoryId, p.name AS name, ROUND(SUM(r.amount), 2) AS amount
          FROM records r
          JOIN categories c ON r.category_id = c.id
          JOIN categories p ON c.parent_id = p.id
@@ -308,8 +339,8 @@ function trendStats(months = 6) {
   const now = new Date()
   const stmt = db.prepare(
     `SELECT
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS expense,
-       COALESCE(SUM(CASE WHEN type = 'income'  THEN amount END), 0) AS income
+       COALESCE(ROUND(SUM(CASE WHEN type = 'expense' THEN amount END), 2), 0) AS expense,
+       COALESCE(ROUND(SUM(CASE WHEN type = 'income'  THEN amount END), 2), 0) AS income
      FROM records
      WHERE substr(date, 1, 7) = ?`
   )

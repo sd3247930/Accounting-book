@@ -29,7 +29,11 @@ async function clearAll() {
     )
     const n = await window.api.data.clearAll()
     ElMessage.success(`已清空 ${n} 条记录`)
-  } catch (e) { /* 用户取消 */ }
+  } catch (e) {
+    // Element Plus 弹窗取消时 reject 的值为 'cancel'；其余为真实错误，需要提示
+    if (e === 'cancel' || (e && e.message === 'cancel')) return
+    ElMessage.error('清空失败：' + (e && e.message ? e.message : e))
+  }
 }
 
 onMounted(async () => {

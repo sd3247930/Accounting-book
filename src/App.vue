@@ -48,7 +48,7 @@ function monthLabel() {
         <span class="ico">{{ n.ico }}</span>{{ n.label }}
       </button>
       <div class="spacer"></div>
-      <div class="version">v1.2.0 · 数据仅存本机</div>
+      <div class="version">v1.3.0 · 数据仅存本机</div>
     </aside>
 
     <div class="main">
