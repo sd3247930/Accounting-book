@@ -1,4 +1,0 @@
-interface:
-  display_name: "分类管理功能"
-  short_description: "为记账应用添加自定义分类管理功能，支持增改删且预置只读"
-  default_prompt: "添加分类管理"

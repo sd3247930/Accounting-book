@@ -1,4 +1,0 @@
-interface:
-  display_name: "2048 AI玩家"
-  short_description: "为2048小游戏添加AI自动玩与自我测试能力，展示AI决策过程"
-  default_prompt: "添加AI自动玩"

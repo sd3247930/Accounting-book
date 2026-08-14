@@ -1,0 +1,4 @@
+interface:
+  display_name: "重新打包应用"
+  short_description: "清理旧打包产物，重新构建并生成Windows与macOS安装包，支持版本号更新"
+  default_prompt: "重新打包"
