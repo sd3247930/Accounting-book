@@ -99,6 +99,8 @@ const testResult = ref(null)
 
 /** AI 定时器句柄 */
 let aiTimer = null
+/** 组件是否已卸载（用于取消后台自测循环） */
+let disposed = false
 
 /** 记录最高分并写回 localStorage */
 function updateBest() {
@@ -155,7 +157,12 @@ function startAI() {
   aiRunning.value = true
   aiPaused.value = false
   aiTimer = setInterval(() => {
-    if (aiPaused.value || over.value || won.value) return
+    if (aiPaused.value) return
+    // 游戏结束或达成 2048：自动停止，避免定时器空转
+    if (over.value || won.value) {
+      stopAI()
+      return
+    }
     const dir = ai.getBestMove(grid.value, 2)
     if (dir < 0) {
       stopAI()
@@ -193,6 +200,7 @@ async function runSelfTest() {
   let sum = 0
 
   for (let i = 0; i < total; i++) {
+    if (disposed) return // 页面已切走，放弃剩余测试
     const res = await ai.playOneAsync(2) // 每局之间让出主线程，界面保持响应
     if (res.maxTile >= 1024) pass++
     if (res.score > bestScore) bestScore = res.score
@@ -223,6 +231,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  disposed = true
   window.removeEventListener('keydown', onKeydown)
   stopAI()
 })

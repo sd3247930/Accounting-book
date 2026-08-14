@@ -47,22 +47,34 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
+/** 统一包装 IPC 处理器：异常转成带中文提示的 Error，渲染层 catch 后可直接展示 */
+function ipcSafe(fn) {
+  return async (...args) => {
+    try {
+      return await fn(...args)
+    } catch (e) {
+      console.error('[ipc]', e)
+      throw new Error(e && e.message ? e.message : String(e))
+    }
+  }
+}
+
 /** 注册所有 IPC 通道 */
 function registerIpc() {
-  ipcMain.handle('categories:list', () => db.listCategories())
-  ipcMain.handle('categories:add', (_e, payload) => db.addCategory(payload || {}))
-  ipcMain.handle('categories:update', (_e, id, newName) => db.updateCategory(id, newName))
-  ipcMain.handle('categories:remove', (_e, id) => db.deleteCategory(id))
+  ipcMain.handle('categories:list', ipcSafe(() => db.listCategories()))
+  ipcMain.handle('categories:add', ipcSafe((_e, payload) => db.addCategory(payload || {})))
+  ipcMain.handle('categories:update', ipcSafe((_e, id, newName) => db.updateCategory(id, newName)))
+  ipcMain.handle('categories:remove', ipcSafe((_e, id) => db.deleteCategory(id)))
 
-  ipcMain.handle('records:add', (_e, payload) => db.addRecord(payload))
-  ipcMain.handle('records:update', (_e, id, payload) => db.updateRecord(id, payload))
-  ipcMain.handle('records:remove', (_e, id) => db.deleteRecord(id))
-  ipcMain.handle('records:list', (_e, filters) => db.listRecords(filters || {}))
-  ipcMain.handle('records:stats', (_e, month) => db.monthStats(month))
-  ipcMain.handle('records:trend', (_e, months) => db.trendStats(months))
-  ipcMain.handle('records:recent', (_e, limit) => db.recentRecords(limit))
+  ipcMain.handle('records:add', ipcSafe((_e, payload) => db.addRecord(payload)))
+  ipcMain.handle('records:update', ipcSafe((_e, id, payload) => db.updateRecord(id, payload)))
+  ipcMain.handle('records:remove', ipcSafe((_e, id) => db.deleteRecord(id)))
+  ipcMain.handle('records:list', ipcSafe((_e, filters) => db.listRecords(filters || {})))
+  ipcMain.handle('records:stats', ipcSafe((_e, month) => db.monthStats(month)))
+  ipcMain.handle('records:trend', ipcSafe((_e, months) => db.trendStats(months)))
+  ipcMain.handle('records:recent', ipcSafe((_e, limit) => db.recentRecords(limit)))
 
-  ipcMain.handle('data:exportCSV', async (_e, filters) => {
+  ipcMain.handle('data:exportCSV', ipcSafe(async (_e, filters) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: '导出 CSV',
       defaultPath: `鲲鹏记账_${new Date().toISOString().slice(0, 10)}.csv`,
@@ -71,9 +83,9 @@ function registerIpc() {
     if (canceled || !filePath) return { canceled: true }
     const count = db.exportCSV(filePath, filters || {})
     return { canceled: false, filePath, count }
-  })
+  }))
 
-  ipcMain.handle('data:exportJSON', async (_e, filters) => {
+  ipcMain.handle('data:exportJSON', ipcSafe(async (_e, filters) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: '导出 JSON',
       defaultPath: `鲲鹏记账_${new Date().toISOString().slice(0, 10)}.json`,
@@ -82,11 +94,11 @@ function registerIpc() {
     if (canceled || !filePath) return { canceled: true }
     const count = db.exportJSON(filePath, filters || {})
     return { canceled: false, filePath, count }
-  })
+  }))
 
-  ipcMain.handle('data:dbPath', () => dbPath())
-  ipcMain.handle('data:openFolder', async () => shell.openPath(path.dirname(dbPath())))
-  ipcMain.handle('data:clearAll', () => db.clearAll())
+  ipcMain.handle('data:dbPath', ipcSafe(() => dbPath()))
+  ipcMain.handle('data:openFolder', ipcSafe(async () => shell.openPath(path.dirname(dbPath()))))
+  ipcMain.handle('data:clearAll', ipcSafe(() => db.clearAll()))
 }
 
 /** 冒烟测试：验证 better-sqlite3 在 Electron 运行时可用 */

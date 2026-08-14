@@ -111,6 +111,8 @@ import * as game from './game.mjs'
     if (game.isGameOver(grid)) return LOSE_PENALTY
     if (depth <= 0) return evaluate(grid)
 
+    // 深拷贝一次再模拟放块，避免修改调用方传入的网格（消除隐式副作用）
+    grid = game.cloneGrid(grid)
     const cells = game.emptyCells(grid)
     let total = 0
     for (const { r, c } of cells) {
