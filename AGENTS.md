@@ -1,4 +1,4 @@
-# 鲲鹏记账（KunPengBook）项目规则
+# 记账APP（KunPengBook）项目规则
 
 本文件是项目记忆（AGENTS.md）。Codex 在每次会话开始前都会读取本文件，并必须遵守以下规则。
 

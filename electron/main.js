@@ -16,6 +16,10 @@ const isSmoke = process.argv.includes('--smoke-test')
 const isBoot = process.argv.includes('--boot-test')
 const isShot = process.argv.includes('--shot-test')
 
+// 应用改名（鲲鹏记账 → 记账APP）后，userData 目录默认会跟着变。
+// 这里固定沿用旧目录，确保历史记账数据（kunpeng.db）继续被读取，不丢数据。
+app.setPath('userData', path.join(app.getPath('appData'), '鲲鹏记账'))
+
 /** 数据库文件放在系统用户数据目录，卸载后自动清理，不污染项目目录 */
 function dbPath() {
   return path.join(app.getPath('userData'), 'kunpeng.db')
@@ -27,7 +31,7 @@ function createWindow() {
     height: 820,
     minWidth: 960,
     minHeight: 640,
-    title: '鲲鹏记账',
+    title: '记账APP',
     backgroundColor: '#F7F3E8',
     autoHideMenuBar: true,
     webPreferences: {
@@ -65,7 +69,7 @@ function registerIpc() {
   ipcMain.handle('data:exportCSV', async (_e, filters) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: '导出 CSV',
-      defaultPath: `鲲鹏记账_${new Date().toISOString().slice(0, 10)}.csv`,
+      defaultPath: `记账APP_${new Date().toISOString().slice(0, 10)}.csv`,
       filters: [{ name: 'CSV', extensions: ['csv'] }]
     })
     if (canceled || !filePath) return { canceled: true }
@@ -76,7 +80,7 @@ function registerIpc() {
   ipcMain.handle('data:exportJSON', async (_e, filters) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: '导出 JSON',
-      defaultPath: `鲲鹏记账_${new Date().toISOString().slice(0, 10)}.json`,
+      defaultPath: `记账APP_${new Date().toISOString().slice(0, 10)}.json`,
       filters: [{ name: 'JSON', extensions: ['json'] }]
     })
     if (canceled || !filePath) return { canceled: true }

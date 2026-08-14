@@ -32,8 +32,8 @@ function monthLabel() {
   <div class="app">
     <aside class="sidebar">
       <div class="logo">
-        <div class="logo-badge">鲲</div>
-        <div class="logo-text"><b>鲲鹏记账</b><span>治愈系 · 本地记账</span></div>
+        <div class="logo-badge">记</div>
+        <div class="logo-text"><b>记账APP</b><span>治愈系 · 本地记账</span></div>
       </div>
       <button
         v-for="n in navs"

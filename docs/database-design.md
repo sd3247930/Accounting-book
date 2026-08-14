@@ -1,4 +1,4 @@
-# 鲲鹏记账 · 数据库设计（SQLite）
+# 记账APP · 数据库设计（SQLite）
 
 > 版本：v1.2（收入逻辑修正 + 分类管理）｜ 引擎：SQLite 3（better-sqlite3）｜ 存储位置：系统用户数据目录 `kunpeng.db`
 

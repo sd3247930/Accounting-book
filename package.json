@@ -1,6 +1,6 @@
 {
   "name": "kunpeng-book",
-  "productName": "鲲鹏记账",
+  "productName": "记账APP",
   "version": "1.2.0",
   "description": "跨平台本地记账桌面应用（Electron + Vue 3 + Element Plus + SQLite）",
   "main": "electron/main.js",
@@ -38,7 +38,7 @@
   },
   "build": {
     "appId": "com.kunpeng.book",
-    "productName": "鲲鹏记账",
+    "productName": "记账APP",
     "directories": {
       "output": "packages"
     },
