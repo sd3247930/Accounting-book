@@ -1,6 +1,7 @@
 # 鲲鹏记账 · Git 基础操作快速参考
 
-> 面向零基础项目拥有者。本项目的 Git 仓库已初始化，当前分支为 `master`。
+> 面向零基础项目拥有者。本项目的 Git 仓库已初始化：
+> 主分支 `main`（稳定版）+ 开发分支 `develop`（日常开发在此进行）。
 
 ## 1. 为什么用 Git
 
@@ -39,10 +40,17 @@ git reset --hard HEAD~1   # 回到上一个版本
 
 ## 5. 分支（可选）
 
+项目当前分支结构：
+
+```text
+main     ← 稳定版本，随时可交付
+develop  ← 日常开发分支（当前所在分支）
+```
+
 ```bash
-git branch develop                    # 创建开发分支
+git branch                            # 查看所有分支
 git checkout develop                  # 切换到开发分支
-git checkout master                   # 切回主分支
+git checkout main                     # 切回主分支
 git merge develop                     # 把开发分支合并回主分支
 ```
 
@@ -69,6 +77,9 @@ git merge develop                     # 把开发分支合并回主分支
 ## 8. 当前仓库状态（2026-08-14）
 
 ```text
+66981dd docs: 纳入课程资料（课件/，7 篇 AI 编程课程笔记）
+d4b73bb chore: 提示词记录更新（移除 API Key 明文，改为指向 .env 配置）
+c98e667 docs: 补充 Git 快速参考文档并完善 .gitignore
 e099190 chore: 打包配置优化与开发进度记录
 d92615d feat: 鲲鹏记账 v1.0 初始版本（Electron + Vue 3 + SQLite）
 ```
