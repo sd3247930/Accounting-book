@@ -139,7 +139,13 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
       <div v-if="data.rows.length === 0" style="color:var(--k-text3);padding:24px 0;text-align:center">没有符合条件的记录</div>
       <div v-for="r in data.rows" :key="r.id" class="row">
         <span class="ico-round" :style="{ background: catMeta(r.parentName).bg }">{{ catMeta(r.parentName).emoji }}</span>
-        <div class="mid"><b>{{ r.parentName }} · {{ r.categoryName }}</b><span>{{ r.note || '无备注' }}</span></div>
+        <div class="mid">
+          <b>
+            <span v-if="r.type === 'income'" class="income-badge">收入</span>
+            {{ r.type === 'income' ? r.categoryName : r.parentName + ' · ' + r.categoryName }}
+          </b>
+          <span>{{ r.note || '无备注' }}</span>
+        </div>
         <div class="right">
           <div class="amt" :class="r.type === 'expense' ? 'expense' : 'income'">{{ sign(r) }}{{ fmt(r.amount) }}</div>
           <div class="date">{{ r.date }}</div>
@@ -162,3 +168,11 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
     />
   </div>
 </template>
+
+<style scoped>
+.income-badge {
+  display: inline-block; margin-right: 6px; padding: 1px 8px;
+  border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: #EFFAF6; color: var(--k-success-text); vertical-align: 1px;
+}
+</style>

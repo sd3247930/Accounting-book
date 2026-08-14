@@ -6,13 +6,15 @@ import AddView from './views/AddView.vue'
 import RecordsView from './views/RecordsView.vue'
 import StatsView from './views/StatsView.vue'
 import DataView from './views/DataView.vue'
+import CategoriesView from './views/CategoriesView.vue'
 
 const navs = [
   { key: 'dashboard', ico: '📊', label: '仪表盘' },
   { key: 'add', ico: '✍️', label: '记一笔' },
   { key: 'list', ico: '📋', label: '明细' },
   { key: 'stats', ico: '📈', label: '统计' },
-  { key: 'data', ico: '🗄️', label: '数据管理' }
+  { key: 'data', ico: '🗄️', label: '数据管理' },
+  { key: 'cats', ico: '🏷️', label: '分类管理' }
 ]
 
 const search = computed({
@@ -44,7 +46,7 @@ function monthLabel() {
         <span class="ico">{{ n.ico }}</span>{{ n.label }}
       </button>
       <div class="spacer"></div>
-      <div class="version">v1.0.0 · 数据仅存本机</div>
+      <div class="version">v1.2.0 · 数据仅存本机</div>
     </aside>
 
     <div class="main">
@@ -63,6 +65,7 @@ function monthLabel() {
         <RecordsView v-else-if="store.view === 'list'" />
         <StatsView v-else-if="store.view === 'stats'" />
         <DataView v-else-if="store.view === 'data'" />
+        <CategoriesView v-else-if="store.view === 'cats'" />
       </div>
     </div>
   </div>

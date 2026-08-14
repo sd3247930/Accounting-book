@@ -50,6 +50,9 @@ function createWindow() {
 /** 注册所有 IPC 通道 */
 function registerIpc() {
   ipcMain.handle('categories:list', () => db.listCategories())
+  ipcMain.handle('categories:add', (_e, payload) => db.addCategory(payload || {}))
+  ipcMain.handle('categories:update', (_e, id, newName) => db.updateCategory(id, newName))
+  ipcMain.handle('categories:remove', (_e, id) => db.deleteCategory(id))
 
   ipcMain.handle('records:add', (_e, payload) => db.addRecord(payload))
   ipcMain.handle('records:update', (_e, id, payload) => db.updateRecord(id, payload))
@@ -89,14 +92,49 @@ function registerIpc() {
 /** 冒烟测试：验证 better-sqlite3 在 Electron 运行时可用 */
 function runSmoke() {
   const smokePath = path.join(app.getPath('temp'), 'kunpeng-smoke.db')
+  ;[smokePath, smokePath + '-wal', smokePath + '-shm'].forEach((p) => fs.rmSync(p, { force: true }))
   db.open(smokePath)
   const cats = db.listCategories()
-  const leaf = cats.find((c) => c.parentId !== null)
+  const meal = cats.find((c) => c.parentId === null && c.name === '餐饮')
+  const leaf = cats.find((c) => c.parentId === meal.id && c.name === '午餐') || cats.find((c) => c.parentId !== null)
   const added = db.addRecord({ type: 'expense', amount: 25, categoryId: leaf.id, date: '2026-08-14', note: 'smoke' })
   const stats = db.monthStats('2026-08')
   const trend = db.trendStats(3)
   const list = db.listRecords({ page: 1, pageSize: 10 })
+
+  // —— 收入逻辑冒烟：历史收入迁移到“收入/其他”，收入来源保持独立 ——
+  const oldIncome = db.addRecord({ type: 'income', amount: 5000, categoryId: leaf.id, date: '2026-08-14', note: 'old' })
+  const moved = (db.migrateIncomeRecords(), db.getRecord(oldIncome.id))
+  const incomeGroup = cats.find((c) => c.parentId === null && c.name === '收入')
+  const salary = cats.find((c) => c.parentId === incomeGroup.id && c.name === '工资')
+  const income2 = db.addRecord({ type: 'income', amount: 8000, categoryId: salary.id, date: '2026-08-14', note: '' })
+  const incomeOk = moved.parentName === '收入' && moved.categoryName === '其他' &&
+    db.getRecord(income2.id).categoryName === '工资'
+
+  // —— 分类管理冒烟：验证预置保护 / 重名 / 使用中禁止删除 / 干净删除 ——
+  const presetTop = cats.find((c) => c.parentId === null)
+  const r1 = db.addCategory({ name: '宠物', parentId: null })            // 新增一级 → 成功
+  const r2 = db.addCategory({ name: '猫粮', parentId: r1.data.id })      // 新增二级 → 成功
+  const r3 = db.addCategory({ name: '宠物', parentId: null })            // 同级重名 → 拒绝
+  const r4 = db.updateCategory(presetTop.id, '改名')                     // 预置改名 → 拒绝
+  const r5 = db.updateCategory(r1.data.id, '宠物生活')                   // 自定义改名 → 成功
+  const used = db.addRecord({ type: 'expense', amount: 9, categoryId: r2.data.id, date: '2026-08-14', note: '' })
+  const r7 = db.deleteCategory(r2.data.id)                               // 被使用的二级 → 拒绝
+  const r8 = db.deleteCategory(r1.data.id)                               // 一级下有被使用的二级 → 拒绝
+  const r9 = db.deleteCategory(leaf.id)                                  // 预置二级 → 拒绝
+  db.deleteRecord(used.id)
+  const r10 = db.deleteCategory(r2.data.id)                              // 无记录后删二级 → 成功
+  const r11 = db.deleteCategory(r1.data.id)                              // 子级清空后删一级 → 成功
+  const catOk =
+    r1.ok && r2.ok && !r3.ok && !r4.ok && r5.ok &&
+    !r7.ok && !r8.ok && !r9.ok && r10.ok && r11.ok
   console.log(`[SMOKE] categories=${cats.length} addedId=${added.id} expense=${stats.expense} trend=${trend.length} total=${list.total}`)
+  console.log(`[SMOKE] income=${incomeOk ? 'PASS' : 'FAIL'} movedTo=${moved.parentName}/${moved.categoryName}`)
+  console.log(`[SMOKE] catCRUD=${catOk ? 'PASS' : 'FAIL'}`, JSON.stringify({
+    addTop: r1.ok, addSub: r2.ok, dupRejected: !r3.ok, presetRenameRejected: !r4.ok,
+    renameOk: r5.ok, usedDeleteRejected: !r7.ok && !r8.ok,
+    presetDeleteRejected: !r9.ok, cleanDeletes: r10.ok && r11.ok
+  }))
   console.log('SMOKE_OK')
   app.exit(0)
 }
@@ -181,12 +219,24 @@ async function runShotTest() {
       await win.webContents.executeJavaScript(`document.querySelector('.nav-item[data-view="add"]')?.click()`)
       await sleep(500)
       await shot('app-add.png')
+      await win.webContents.executeJavaScript(`document.querySelector('.type-btn.income')?.click()`)
+      await sleep(400)
+      await shot('app-add-income.png')
       await win.webContents.executeJavaScript(`document.querySelector('.nav-item[data-view="list"]')?.click()`)
       await sleep(500)
       await shot('app-list.png')
+      await win.webContents.executeJavaScript(`document.querySelector('.content')?.scrollTo(0, document.querySelector('.content')?.scrollHeight || 0)`)
+      await sleep(400)
+      await shot('app-list-bottom.png')
       await win.webContents.executeJavaScript(`document.querySelector('.nav-item[data-view="stats"]')?.click()`)
       await sleep(500)
       await shot('app-stats.png')
+      await win.webContents.executeJavaScript(`document.querySelector('.nav-item[data-view="cats"]')?.click()`)
+      await sleep(500)
+      await shot('app-cats.png')
+      await win.webContents.executeJavaScript(`document.querySelector('.content')?.scrollTo(0, document.querySelector('.content')?.scrollHeight || 0)`)
+      await sleep(400)
+      await shot('app-cats-bottom.png')
       console.log('SHOT_OK')
       app.exit(0)
     } catch (e) {
@@ -217,11 +267,19 @@ function seedSampleData() {
     ['expense', 220, sub('餐饮', '聚餐'), '2026-08-09', '同学聚会'],
     ['expense', 68, sub('教育', '书籍教材'), '2026-08-08', '技术书'],
     ['expense', 200, sub('人情', '红包礼金'), '2026-08-07', '同事结婚'],
-    ['income', 3520, sub('其他', '杂项'), '2026-08-05', '本月收入'],
+    ['income', 3520, sub('收入', '工资'), '2026-08-05', '本月工资'],
     ['expense', 12, sub('餐饮', '饮品'), '2026-08-05', '奶茶'],
     ['expense', 30, sub('娱乐', '游戏充值'), '2026-08-03', ''],
     ['expense', 88, sub('购物', '数码产品'), '2026-08-01', '数据线']
   ]
+  // 追加自定义分类与记录，便于预览分类管理页（仅测试库）
+  const customTop = db.addCategory({ name: '宠物', parentId: null })
+  if (customTop.ok) {
+    const food = db.addCategory({ name: '猫粮', parentId: customTop.data.id })
+    const toys = db.addCategory({ name: '狗粮', parentId: customTop.data.id })
+    if (food.ok) sample.push(['expense', 128, food.data.id, '2026-08-06', '猫罐头'])
+    if (toys.ok) sample.push(['expense', 45, toys.data.id, '2026-08-04', '狗零食'])
+  }
   const insert = db.addRecord
   sample.forEach(([type, amount, categoryId, date, note]) =>
     insert({ type, amount, categoryId, date, note })

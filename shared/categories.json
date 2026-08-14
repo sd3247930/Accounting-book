@@ -9,5 +9,6 @@
   { "name": "教育", "emoji": "📚", "bg": "#FCE8F0", "color": "#EC7FA8", "subs": ["学费/培训", "书籍教材", "考试报名"] },
   { "name": "人情", "emoji": "🎁", "bg": "#FDE4E8", "color": "#F2708D", "subs": ["红包礼金", "请客吃饭", "捐助"] },
   { "name": "投资", "emoji": "📈", "bg": "#E6E8F7", "color": "#6C6CDB", "subs": ["理财亏损", "股票基金"] },
-  { "name": "其他", "emoji": "📦", "bg": "#EFEDE7", "color": "#9B9588", "subs": ["杂项", "未分类"] }
+  { "name": "其他", "emoji": "📦", "bg": "#EFEDE7", "color": "#9B9588", "subs": ["杂项", "未分类"] },
+  { "name": "收入", "emoji": "💰", "bg": "#E5F6EF", "color": "#2FA77E", "subs": ["工资", "奖金", "兼职", "投资收益", "红包", "其他"] }
 ]

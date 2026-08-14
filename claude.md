@@ -254,3 +254,48 @@ npm run dev        # 开发模式（热更新）
 npm start          # 生产模式（需先 npm run build）
 release/KunPengBook-1.0.0-x64-Portable.exe   # 免安装直接使用
 ```
+
+### 9.5 开发进度（2026-08-14）· v1.1 分类自定义管理
+
+**已开发完成并验证**
+
+- 数据库：`categories` 表新增 `is_preset` 列（1=预置只读，0=自定义），
+  旧库自动 `ALTER TABLE` 迁移；新增 `parent_id / is_preset` 索引
+- 数据层（`electron/db.js`）：分类增/改/删 + 查询，含预置保护、
+  同级重名（不区分大小写）、删除前记录引用检查、一级删除级联事务
+- IPC/Preload：新增 `categories:add / update / remove`
+- UI：新增「分类管理」页面（侧边栏入口），预置带 🔒 锁标识只读，
+  自定义分类可增改删；二级分类继承一级图标颜色，自定义分类走兜底色板
+- 验证：Vite 构建通过；冒烟测试 `catCRUD=PASS`
+  （新增/重名拒绝/预置改名拒绝/改名成功/使用中禁止删除/干净删除）；
+  界面截图见 `prototype/preview/app-cats.png`、`app-cats-bottom.png`
+- 验收方式：见最终交付说明中的人工测试清单
+
+**v1.1.0 打包（2026-08-14）**
+
+- 版本号升至 1.1.0，界面右下角同步显示 v1.1.0
+- 交付 `release/KunPengBook-1.1.0-x64-Portable.exe` 与 `release/KunPengBook-1.1.0-x64.zip`
+- 打包产物冒烟测试通过（ExitCode=0，含分类 CRUD 断言）
+- NSIS 安装版仍被本机杀软实时防护拦截（makensis 创建卸载程序失败），
+  可在杀软排除 electron-builder 缓存目录后重试，或换机器打包；图标仍为 Electron 默认图标
+
+### 9.6 开发进度（2026-08-14）· v1.2 收入逻辑修正 + 安装包体积优化
+
+**收入逻辑修正**
+
+- 新增预置“收入”分组及 6 个来源（工资/奖金/兼职/投资收益/红包/其他），
+  录入界面选择“收入”时切换为收入来源单选，支出保持一级+二级分类
+- 明细/首页收入行显示绿色“收入”徽标 + 来源名称、绿色 +¥ 金额；
+  历史收入记录启动时自动迁移到“收入/其他”（幂等）
+- 冒烟测试新增收入断言 `income=PASS`；旧库迁移测试 `incomeBackfilled=PASS`
+
+**体积优化（详见 docs/size-optimization.md）**
+
+- 根因：`files: dist/**/*` 把 electron-builder 输出目录递归打进 app.asar（703MB），
+  且 node_modules 源码全量打包、未开压缩
+- 措施：输出目录分离到 `packages/`、依赖白名单（只留 better-sqlite3 运行链）、
+  只保留中英文语言包、`compression=maximum`
+- 一键打包：`npm run pack:win`；产物输出到 `packages/`
+- 结果：Portable 459MB → **78.2MB**，zip 556MB → **117.3MB**，NSIS 安装版 **85.5MB**；
+  NSIS 需把输出目录临时指向已排除的 nsis 缓存目录（见 docs/size-optimization.md §6）
+- 打包产物冒烟测试通过（Portable 与 zip 均 ExitCode=0）

@@ -5,7 +5,10 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('api', {
   categories: {
-    list: () => ipcRenderer.invoke('categories:list')
+    list: () => ipcRenderer.invoke('categories:list'),
+    add: (payload) => ipcRenderer.invoke('categories:add', payload),
+    update: (id, newName) => ipcRenderer.invoke('categories:update', id, newName),
+    remove: (id) => ipcRenderer.invoke('categories:remove', id)
   },
   records: {
     add: (payload) => ipcRenderer.invoke('records:add', payload),
