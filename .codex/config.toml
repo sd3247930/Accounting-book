@@ -1,0 +1,11 @@
+# 项目级 Codex 配置：质量门禁第二道防线
+# PreToolUse 钩子拦截 Codex 发起的 git commit，通行证无效时拒绝。
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = 'node "$(git rev-parse --show-toplevel)/.codex/hooks/pre_tool_use_gate.mjs"'
+command_windows = 'node "D:/codex code/Accounting book/.codex/hooks/pre_tool_use_gate.mjs"'
+timeout = 30
+statusMessage = "检查质量门禁通行证"

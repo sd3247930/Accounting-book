@@ -1,4 +1,5 @@
 <script setup>
+/** 统计卡片：展示单个指标（图标、数值、说明文字），纯展示组件无逻辑 */
 defineProps({
   label: String,
   icon: String,

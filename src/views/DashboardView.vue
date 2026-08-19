@@ -10,6 +10,7 @@ const stats = ref({ expense: 0, income: 0, count: 0, byCategory: [] })
 const trend = ref([])
 const recent = ref([])
 
+/** 并行加载本月统计、近 6 个月趋势与最近 6 条记录 */
 async function load() {
   try {
     const [s, t, r] = await Promise.all([
@@ -26,13 +27,16 @@ async function load() {
 }
 onMounted(load)
 
+/** 金额格式化为 ¥1,234.56 */
 const fmt = (n) => '¥' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+/** 日均支出 = 本月总支出 ÷ 当月天数（用于“日均”卡片） */
 const avg = computed(() => {
   const d = new Date()
   const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
   return (stats.value.expense / days).toFixed(1)
 })
 
+/** 环形图配置：本月各一级分类支出占比，中心显示总支出 */
 const donutOption = computed(() => ({
   tooltip: { trigger: 'item', formatter: '{b}：¥{c}（{d}%）' },
   title: {
@@ -52,15 +56,18 @@ const donutOption = computed(() => ({
     emphasis: { label: { show: false } },
     data: stats.value.byCategory.map((c) => ({
       name: c.name,
+      // 四舍五入到分，消除 SQLite 浮点求和可能产生的长尾小数
       value: Math.round(c.amount * 100) / 100,
       itemStyle: { color: catMeta(c.name).color }
     }))
   }]
 }))
 
+/** 近 6 个月中支出最高的月份下标（用于柱子高亮） */
 const maxIdx = computed(() =>
   trend.value.reduce((mi, t, i) => (t.expense > (trend.value[mi]?.expense ?? 0) ? i : mi), 0)
 )
+/** 柱状图配置：近 6 个月支出趋势，最高月份高亮 */
 const barOption = computed(() => ({
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v) => '¥' + Number(v).toLocaleString('zh-CN') },
   grid: { left: 8, right: 8, top: 26, bottom: 8, containLabel: true },
@@ -87,11 +94,13 @@ const barOption = computed(() => ({
   }]
 }))
 
+/** 支出显示负号、收入显示正号 */
 function sign(r) { return r.type === 'expense' ? '-' : '+' }
 </script>
 
 <template>
   <div>
+    <!-- 顶部指标卡：总支出 / 总收入 / 笔数 / 日均 -->
     <div class="stat-grid">
       <StatCard label="本月总支出" icon="🍱" bg="#FADFDC" :value="fmt(stats.expense)" color="var(--k-danger-text)" delta="红 = 支出" />
       <StatCard label="本月总收入" icon="💰" bg="#DBF2EB" :value="fmt(stats.income)" color="var(--k-success-text)" delta="绿 = 收入" />
@@ -99,6 +108,7 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
       <StatCard label="日均支出" icon="🌤️" bg="#FAF2D9" :value="'¥' + avg" delta="按当月天数计算" />
     </div>
 
+    <!-- 图表区：分类占比环形图 + 月度趋势柱状图 -->
     <div class="two-col">
       <div class="card">
         <div class="card-title">分类占比<span class="card-sub">{{ store.month }} 支出构成</span></div>
@@ -110,6 +120,7 @@ function sign(r) { return r.type === 'expense' ? '-' : '+' }
       </div>
     </div>
 
+    <!-- 最近记录：最近 6 条收支快速预览 -->
     <div class="card">
       <div class="card-title">最近记录</div>
       <div v-if="recent.length === 0" style="color:var(--k-text3);padding:16px 0">还没有记录，点「记一笔」开始吧～</div>

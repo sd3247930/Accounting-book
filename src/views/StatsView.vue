@@ -8,6 +8,7 @@ import ChartBox from '../components/ChartBox.vue'
 const stats = ref({ expense: 0, income: 0, count: 0, byCategory: [] })
 const trend = ref([])
 
+/** 并行加载本月统计与近 6 个月趋势 */
 async function load() {
   try {
     const [s, t] = await Promise.all([
@@ -22,9 +23,12 @@ async function load() {
 }
 onMounted(load)
 
+/** 金额格式化为 ¥1,234.56 */
 const fmt = (n) => '¥' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+/** 排行条的最大基准值（取最大分类金额，至少为 1 避免除零） */
 const maxTotal = computed(() => Math.max(...stats.value.byCategory.map((c) => c.amount), 1))
 
+/** 环形图配置：本月支出构成 */
 const donutOption = computed(() => ({
   tooltip: { trigger: 'item', formatter: '{b}：¥{c}（{d}%）' },
   title: {
@@ -42,15 +46,18 @@ const donutOption = computed(() => ({
     label: { show: false },
     data: stats.value.byCategory.map((c) => ({
       name: c.name,
+      // 四舍五入到分，消除 SQLite 浮点求和可能产生的长尾小数
       value: Math.round(c.amount * 100) / 100,
       itemStyle: { color: catMeta(c.name).color }
     }))
   }]
 }))
 
+/** 近 6 个月中支出最高的月份下标（用于柱子高亮） */
 const maxIdx = computed(() =>
   trend.value.reduce((mi, t, i) => (t.expense > (trend.value[mi]?.expense ?? 0) ? i : mi), 0)
 )
+/** 柱状图配置：近 6 个月支出趋势 */
 const barOption = computed(() => ({
   tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v) => '¥' + Number(v).toLocaleString('zh-CN') },
   grid: { left: 8, right: 8, top: 26, bottom: 8, containLabel: true },
@@ -76,6 +83,7 @@ const barOption = computed(() => ({
 
 <template>
   <div>
+    <!-- 图表区：支出构成环形图 + 月度趋势柱状图 -->
     <div class="two-col">
       <div class="card">
         <div class="card-title">支出构成<span class="card-sub">{{ store.month }}</span></div>
@@ -87,6 +95,7 @@ const barOption = computed(() => ({
       </div>
     </div>
 
+    <!-- 分类排行：本月各一级分类支出占比与进度条 -->
     <div class="card">
       <div class="card-title">分类排行<span class="card-sub">本月支出 Top</span></div>
       <div v-if="stats.byCategory.length === 0" style="color:var(--k-text3);padding:16px 0">本月还没有支出记录</div>

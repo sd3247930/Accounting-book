@@ -1,0 +1,4 @@
+interface:
+  display_name: "安全审计"
+  short_description: "检查敏感信息泄露、SQL注入等安全风险，输出中文审计报告"
+  default_prompt: "Use $security-audit to audit the codebase for security risks"

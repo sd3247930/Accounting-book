@@ -1,0 +1,7 @@
+#!/bin/sh
+# push 成功后清除旧通行证：下一次提交必须重新通过测试与质量检查。
+# Git 只在 push 成功后调用 post-push 钩子。
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+rm -f "$ROOT/.quality-gate/tester-pass.json" "$ROOT/.quality-gate/quality-pass.json"
+echo "✅ push 成功，已清除质量门禁通行证；下次提交前需重新运行 gitcommit-agent。"
+exit 0

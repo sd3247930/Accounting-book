@@ -194,6 +194,7 @@ function deleteCategory(id) {
   return { ok: true, data: { id } }
 }
 
+/** 按 ID 取单条记录，联表带出一级/二级分类名；不存在返回 undefined */
 function getRecord(id) {
   return db
     .prepare(

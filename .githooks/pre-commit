@@ -1,0 +1,4 @@
+#!/bin/sh
+# 质量门禁 pre-commit 钩子：校验 tester 与 quality-engineer 的通行证。
+# 通过 → exit 0 放行；不通过 → 打印原因并 exit 1 拒绝提交。
+exec node "$(dirname "$0")/pre-commit.mjs"

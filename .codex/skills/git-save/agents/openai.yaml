@@ -1,0 +1,4 @@
+interface:
+  display_name: "存档提交"
+  short_description: "展示改动并按规范执行 git add/commit 的纯存档技能"
+  default_prompt: "Use $git-save to commit the current changes"

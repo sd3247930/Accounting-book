@@ -110,7 +110,7 @@ function updateBest() {
   }
 }
 
-/** 新开一局 */
+/** 新开一局：停止 AI、重置网格/分数/结束状态 */
 function restart() {
   stopAI()
   const state = game.newGame()
@@ -121,7 +121,7 @@ function restart() {
   testResult.value = null
 }
 
-/** 执行一步移动（手动或 AI 共用） */
+/** 执行一步移动（手动或 AI 共用）：移动 → 生成新块 → 加分 → 判定结束/胜利 */
 function step(dir) {
   if (over.value || won.value) return
   const res = game.move(grid.value, dir)
@@ -135,7 +135,7 @@ function step(dir) {
   if (game.hasWon(grid.value)) won.value = true
 }
 
-/** 手动键盘控制（AI 运行时忽略按键） */
+/** 手动键盘控制：方向键映射到游戏方向；AI 运行或测试时忽略按键 */
 function onKeydown(e) {
   if (aiRunning.value || testing.value) return
   const map = {
@@ -151,7 +151,7 @@ function onKeydown(e) {
   }
 }
 
-/** 启动 AI 自动玩 */
+/** 启动 AI 自动玩：每 120ms 走一步；结束/无路可走时自动停止 */
 function startAI() {
   if (over.value || won.value) restart()
   aiRunning.value = true
@@ -172,12 +172,12 @@ function startAI() {
   }, AI_STEP_MS)
 }
 
-/** 暂停 / 继续 */
+/** 暂停 / 继续 AI 自动玩 */
 function togglePause() {
   aiPaused.value = !aiPaused.value
 }
 
-/** 停止 AI */
+/** 停止 AI：清理定时器并复位状态 */
 function stopAI() {
   if (aiTimer) {
     clearInterval(aiTimer)
@@ -187,7 +187,7 @@ function stopAI() {
   aiPaused.value = false
 }
 
-/** AI 自我测试：后台连跑 10 局并统计达标率 */
+/** AI 自我测试：后台连跑 10 局（每局让出主线程保持界面响应），统计达标率 */
 async function runSelfTest() {
   if (testing.value) return
   testing.value = true
@@ -218,18 +218,20 @@ async function runSelfTest() {
   testing.value = false
 }
 
-/** 方块配色：按数值返回 CSS 类名 */
+/** 方块配色：按数值返回 CSS 类名，超过 4096 统一用“超级块”样式 */
 function tileClass(v) {
   if (!v) return ''
   if (v >= 4096) return 'tile-super'
   return `tile-${v}`
 }
 
+/** 挂载：注册键盘监听并自动开局 */
 onMounted(() => {
   window.addEventListener('keydown', onKeydown)
   restart() // 进入页面自动开一局
 })
 
+/** 卸载：释放键盘监听、停止 AI 定时器、标记组件已销毁（中断后台自测） */
 onBeforeUnmount(() => {
   disposed = true
   window.removeEventListener('keydown', onKeydown)

@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const dbPath = ref('')
 
+/** 导出数据：CSV 或 JSON，由主进程弹保存对话框，取消则静默返回 */
 async function doExport(kind) {
   try {
     const res = kind === 'csv'
@@ -16,10 +17,12 @@ async function doExport(kind) {
   }
 }
 
+/** 打开数据库所在文件夹（方便用户手动备份） */
 async function openFolder() {
   await window.api.data.openFolder()
 }
 
+/** 清空全部记录：二次确认后调用 IPC；区分“用户取消”与真实错误 */
 async function clearAll() {
   try {
     await ElMessageBox.confirm(
@@ -36,6 +39,7 @@ async function clearAll() {
   }
 }
 
+/** 进入页面：读取并展示本地数据库文件路径 */
 onMounted(async () => {
   dbPath.value = await window.api.data.dbPath()
 })
@@ -43,6 +47,7 @@ onMounted(async () => {
 
 <template>
   <div>
+    <!-- 工具卡片：导出 CSV / 导出 JSON / 打开数据文件夹 -->
     <div class="util-grid">
       <div class="util">
         <div class="ico">📄</div>
@@ -64,11 +69,13 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- 本地数据位置：告知用户数据存在哪里 -->
     <div class="card">
       <div class="card-title">本地数据位置</div>
       <div class="db-path">{{ dbPath }}</div>
     </div>
 
+    <!-- 危险操作区：清空全部记录（建议先备份） -->
     <div class="card" style="margin-top: 16px">
       <div class="card-title">危险操作</div>
       <p style="color:var(--k-text2);font-size:14px;margin-bottom:14px">清空全部记录不可恢复，建议先导出备份。</p>

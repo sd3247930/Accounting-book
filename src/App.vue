@@ -9,6 +9,7 @@ import DataView from './views/DataView.vue'
 import CategoriesView from './views/CategoriesView.vue'
 import Game2048View from './views/Game2048View.vue'
 
+/** 左侧导航菜单：key 对应 store.view 的页面标识 */
 const navs = [
   { key: 'dashboard', ico: '📊', label: '仪表盘' },
   { key: 'add', ico: '✍️', label: '记一笔' },
@@ -19,11 +20,13 @@ const navs = [
   { key: 'game2048', ico: '🎮', label: '2048' }
 ]
 
+/** 顶部搜索框与明细页搜索关键词双向绑定 */
 const search = computed({
   get: () => store.searchKeyword,
   set: (v) => { store.searchKeyword = v }
 })
 
+/** 把 YYYY-MM 显示成“2026年8月”的中文标题 */
 function monthLabel() {
   const [y, m] = store.month.split('-')
   return `${y}年${Number(m)}月`
@@ -32,6 +35,7 @@ function monthLabel() {
 
 <template>
   <div class="app">
+    <!-- 左侧导航栏：logo + 页面切换按钮 -->
     <aside class="sidebar">
       <div class="logo">
         <div class="logo-badge">鲲</div>
@@ -52,6 +56,7 @@ function monthLabel() {
     </aside>
 
     <div class="main">
+      <!-- 顶部栏：月份显示 + 全局搜索 + 快速记一笔 -->
       <div class="topbar">
         <div class="month-pill">‹ {{ monthLabel() }} ›</div>
         <div class="search">
@@ -61,6 +66,7 @@ function monthLabel() {
         <el-button type="primary" round @click="go('add')">＋ 记一笔</el-button>
       </div>
 
+      <!-- 内容区：按当前页面切换渲染对应视图 -->
       <div class="content">
         <DashboardView v-if="store.view === 'dashboard'" />
         <AddView v-else-if="store.view === 'add'" />

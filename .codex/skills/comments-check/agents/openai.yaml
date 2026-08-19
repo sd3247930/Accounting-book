@@ -1,0 +1,4 @@
+interface:
+  display_name: "注释检查"
+  short_description: "检查代码注释是否缺失、与代码匹配、对小白友好，输出中文报告"
+  default_prompt: "Use $comments-check to check code comments and generate a report"

@@ -21,6 +21,7 @@ function dbPath() {
   return path.join(app.getPath('userData'), 'kunpeng.db')
 }
 
+/** 创建主窗口：1280x820，启用上下文隔离，加载开发服务器或打包产物 */
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -61,11 +62,13 @@ function ipcSafe(fn) {
 
 /** 注册所有 IPC 通道 */
 function registerIpc() {
+  // 分类管理通道
   ipcMain.handle('categories:list', ipcSafe(() => db.listCategories()))
   ipcMain.handle('categories:add', ipcSafe((_e, payload) => db.addCategory(payload || {})))
   ipcMain.handle('categories:update', ipcSafe((_e, id, newName) => db.updateCategory(id, newName)))
   ipcMain.handle('categories:remove', ipcSafe((_e, id) => db.deleteCategory(id)))
 
+  // 记账记录通道
   ipcMain.handle('records:add', ipcSafe((_e, payload) => db.addRecord(payload)))
   ipcMain.handle('records:update', ipcSafe((_e, id, payload) => db.updateRecord(id, payload)))
   ipcMain.handle('records:remove', ipcSafe((_e, id) => db.deleteRecord(id)))
@@ -74,6 +77,7 @@ function registerIpc() {
   ipcMain.handle('records:trend', ipcSafe((_e, months) => db.trendStats(months)))
   ipcMain.handle('records:recent', ipcSafe((_e, limit) => db.recentRecords(limit)))
 
+  // 数据管理通道：导出/路径/清空
   ipcMain.handle('data:exportCSV', ipcSafe(async (_e, filters) => {
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: '导出 CSV',
@@ -214,6 +218,7 @@ async function runShotTest() {
   })
   const outDir = path.join(__dirname, '../prototype/preview')
   fs.mkdirSync(outDir, { recursive: true })
+  /** 等待指定毫秒数（让页面动画/渲染完成后再截图） */
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
   win.webContents.on('did-fail-load', (_e, code, desc) => {
     console.log(`SHOT_FAIL ${code} ${desc}`)
@@ -222,6 +227,7 @@ async function runShotTest() {
   win.webContents.once('did-finish-load', async () => {
     try {
       await sleep(2500)
+      /** 截取当前窗口画面并保存为 PNG */
       const shot = async (name) => {
         const image = await win.webContents.capturePage()
         fs.writeFileSync(path.join(outDir, name), image.toPNG())

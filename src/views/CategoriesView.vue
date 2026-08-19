@@ -4,22 +4,24 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { catMeta } from '../utils/categoryMeta'
 
 const categories = ref([])
+/** 展开的一级分类 ID 列表（el-collapse 用字符串 id） */
 const expanded = ref([])
 
-/** 一级分类（parentId 为 null） */
+/** 一级分类列表（parentId 为 null） */
 const parents = computed(() => categories.value.filter((c) => c.parentId === null))
-/** 某一级分类下的二级分类 */
+/** 指定一级分类下的二级分类列表 */
 const subsOf = (pid) => categories.value.filter((c) => c.parentId === pid)
-/** 取展示用图标/颜色（自定义分类走兜底色板） */
+/** 取分类展示样式：自定义分类自动落到兜底色板 */
 const metaOf = (c) => catMeta(c.name)
 
+/** 加载全部分类，并默认展开所有一级分类 */
 async function load() {
   categories.value = await window.api.categories.list()
   // 默认全部展开，方便一眼看到所有分类
   expanded.value = parents.value.map((p) => String(p.id))
 }
 
-/** 弹出名称输入框；取消时抛异常由调用方静默处理 */
+/** 弹出名称输入框（20 字以内）；用户取消时抛异常，由调用方静默处理 */
 async function promptName(title, value = '') {
   const { value: name } = await ElMessageBox.prompt('请输入分类名称（20 字以内）', title, {
     confirmButtonText: '确定',
@@ -30,6 +32,7 @@ async function promptName(title, value = '') {
   return name.trim()
 }
 
+/** 添加一级分类：弹输入框 → 调 IPC → 成功后刷新列表 */
 async function addTop() {
   try {
     const name = await promptName('添加一级分类')
@@ -40,6 +43,7 @@ async function addTop() {
   } catch (e) { /* 用户取消 */ }
 }
 
+/** 在指定一级分类下添加二级分类 */
 async function addSub(parent) {
   try {
     const name = await promptName(`在「${parent.name}」下添加二级分类`)
@@ -50,6 +54,7 @@ async function addSub(parent) {
   } catch (e) { /* 用户取消 */ }
 }
 
+/** 修改分类名称（仅自定义分类可改，预置分类按钮不显示） */
 async function edit(cat) {
   try {
     const name = await promptName('修改分类名称', cat.name)
@@ -60,6 +65,7 @@ async function edit(cat) {
   } catch (e) { /* 用户取消 */ }
 }
 
+/** 删除分类：二次确认后调 IPC；被记录引用的分类会被数据层拒绝 */
 async function remove(cat) {
   const parent = cat.parentId === null ? null : parents.value.find((p) => p.id === cat.parentId)
   const label = parent ? `「${parent.name}」下的分类「${cat.name}」` : `分类「${cat.name}」`
@@ -76,11 +82,13 @@ async function remove(cat) {
   } catch (e) { /* 取消或已在上面提示 */ }
 }
 
+/** 进入页面：加载分类列表 */
 onMounted(load)
 </script>
 
 <template>
   <div>
+    <!-- 分类管理标题与说明 -->
     <div class="card">
       <div class="cat-head">
         <div>
@@ -91,6 +99,7 @@ onMounted(load)
       </div>
     </div>
 
+    <!-- 分类列表：一级分类手风琴展开，二级分类网格展示 -->
     <div class="cat-list">
       <el-collapse v-model="expanded">
         <el-collapse-item v-for="p in parents" :key="p.id" :name="String(p.id)">
