@@ -1,0 +1,8 @@
+#!/bin/sh
+# 推送前清除通行证：git 2.x 只把 post-push 写进文档、并未真正调用，
+# 因此改用确实会执行的 pre-push 钩子删除通行证。
+# 说明：通行证在提交后本就因工作区指纹变化而失效，这里删除只是显式作废，
+# 不影响推送本身（exit 0 放行）。
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+rm -f "$ROOT/.quality-gate/tester-pass.json" "$ROOT/.quality-gate/quality-pass.json"
+exit 0

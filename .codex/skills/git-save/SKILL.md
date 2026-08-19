@@ -26,4 +26,4 @@ description: 纯粹的代码存档技能：展示改动、按中文规范写提�
    - 示例：`feat: 增加质量门禁 pre-commit 钩子`
 4. 执行 `git commit -m "<信息>"`。
    - 若 pre-commit 钩子拒绝（exit 1），把拒绝原因原样告知用户，提示先运行 gitcommit-agent 完成测试与质量检查。
-5. 提交成功后报告 commit 短哈希与提交信息；提示是否 push（push 成功后 post-push 钩子会自动清除通行证）。
+5. 提交成功后报告 commit 短哈希与提交信息；提示是否 push（push 时 pre-push 钩子会自动清除通行证；git 未实现 post-push 钩子，故用 pre-push 实现清除）。

@@ -12,7 +12,7 @@ developer_instructions = '''
    - 删除并重写 `.quality-gate/tester-pass.json` 与 `.quality-gate/quality-pass.json`，保留各自的 status/tool/summary，仅更新 checkedAt 与 treeFingerprint（PowerShell 写法见 tester/quality-engineer 代理指令）。
 4. 校验通行证：运行 `node .githooks/pre-commit.mjs`，输出“质量门禁通过”才继续；不通过则中止并汇报原因。
 5. 调用 git-save 技能提交：git status 展示 → git add → 按规范写提交信息 → git commit（pre-commit 钩子会复核通行证）。
-6. 提交成功后报告 commit 短哈希，并提示可 push；push 成功后 post-push 钩子会自动清除通行证，下次提交需重新检查。
+6. 提交成功后报告 commit 短哈希，并提示可 push；push 时 pre-push 钩子会自动清除通行证（git 未实现 post-push 钩子），下次提交需重新检查。
 
 注意：检查只读不改业务逻辑；发现问题先汇报，由用户决定是否修复。
 '''
