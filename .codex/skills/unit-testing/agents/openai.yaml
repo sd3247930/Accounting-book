@@ -1,0 +1,4 @@
+interface:
+  display_name: "单元测试"
+  short_description: "为项目核心代码创建并执行单元测试，汇总通过率与失败详情生成测试报告"
+  default_prompt: "跑单元测试"
