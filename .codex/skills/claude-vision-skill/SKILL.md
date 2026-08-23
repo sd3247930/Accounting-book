@@ -8,19 +8,19 @@ description: Use when the user shares, pastes, or references an image (local pat
 The current model may not support native image input. When the user provides an image path or URL, do not rely on viewing the image directly. Instead run:
 
 ```bash
-node "D:\codex code\Accounting book\.codex\skills\claude-vision-skill\vision.js" "<absolute image path>" "<prompt>"
+node "<项目根目录>\.codex\skills\claude-vision-skill\vision.js" "<absolute image path>" "<prompt>"
 ```
 
 For an image URL:
 
 ```bash
-node "D:\codex code\Accounting book\.codex\skills\claude-vision-skill\vision.js" --url "<image url>" "<prompt>"
+node "<项目根目录>\.codex\skills\claude-vision-skill\vision.js" --url "<image url>" "<prompt>"
 ```
 
 When the user pastes an image into the chat but no file path or URL is visible:
 
 ```bash
-node "D:\codex code\Accounting book\.codex\skills\claude-vision-skill\vision.js" --clipboard "<prompt>"
+node "<项目根目录>\.codex\skills\claude-vision-skill\vision.js" --clipboard "<prompt>"
 ```
 
 `--clipboard` reads the current image from the system clipboard (macOS uses a bundled Swift helper, Windows uses a bundled PowerShell script; the pasted image is usually still there). If it fails, ask the user to save the image to a file and provide the absolute path.

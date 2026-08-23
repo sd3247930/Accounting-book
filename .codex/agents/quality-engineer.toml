@@ -25,9 +25,9 @@ developer_instructions = '''
 '''
 
 [[skills.config]]
-path = "D:/codex code/Accounting book/.codex/skills/security-audit/SKILL.md"
+path = ".codex/skills/security-audit/SKILL.md"
 enabled = true
 
 [[skills.config]]
-path = "D:/codex code/Accounting book/.codex/skills/comments-check/SKILL.md"
+path = ".codex/skills/comments-check/SKILL.md"
 enabled = true

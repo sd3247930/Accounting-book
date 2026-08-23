@@ -87,7 +87,7 @@ Portable ≤ 200 MB 目标达成，且远优于预期。
 electron-builder 缓存目录内，例如：
 
 ```bash
-electron-builder --win nsis --config.directories.output="C:\Users\Administrator\AppData\Local\electron-builder\Cache\nsis\out"
+electron-builder --win nsis --config.directories.output="C:\Users\<用户名>\AppData\Local\electron-builder\Cache\nsis\out"
 ```
 
 构建成功后把 `KunPengBook-Setup-{version}-x64.exe` 复制/移动到 `release/` 即可。

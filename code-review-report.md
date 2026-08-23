@@ -27,10 +27,10 @@
 
 | 位置 | 问题 | 影响 |
 | --- | --- | --- |
-| [RecordsView.vue](/D:/codex%20code/Accounting%20book/src/views/RecordsView.vue:84) `removeRow` | `catch (e) { /* 用户取消 */ }` 把**所有**异常当取消处理 | 删除真的失败（数据库错误、IPC 异常）时用户仍收到“已删除”，数据其实还在 |
-| [CategoriesView.vue](/D:/codex%20code/Accounting%20book/src/views/CategoriesView.vue:33) `addTop`/`addSub`/`edit`/`remove` | 同样把真实异常与“用户取消”混为一谈 | 改名/删除失败时不提示，操作“无声失败” |
+| [RecordsView.vue](src/views/RecordsView.vue:84) `removeRow` | `catch (e) { /* 用户取消 */ }` 把**所有**异常当取消处理 | 删除真的失败（数据库错误、IPC 异常）时用户仍收到“已删除”，数据其实还在 |
+| [CategoriesView.vue](src/views/CategoriesView.vue:33) `addTop`/`addSub`/`edit`/`remove` | 同样把真实异常与“用户取消”混为一谈 | 改名/删除失败时不提示，操作“无声失败” |
 
-修复建议：区分取消与真实错误，参考 [DataView.vue](/D:/codex%20code/Accounting%20book/src/views/DataView.vue:23) 已写对的写法：
+修复建议：区分取消与真实错误，参考 [DataView.vue](src/views/DataView.vue:23) 已写对的写法：
 
 ```js
 catch (e) {
@@ -41,7 +41,7 @@ catch (e) {
 
 ### 2. 数据层缺少日期格式校验（违背“数据层最后防线”）
 
-[db.js](/D:/codex%20code/Accounting%20book/electron/db.js:217) `validateRecordInput` 只校验类型/金额/分类，**没有校验 date**；`addRecord`（235 行）与 `updateRecord`（244 行）可写入 `'abc'`、`'2026-13-99'` 等非法日期，直接破坏月度统计与日期过滤。
+[db.js](electron/db.js:217) `validateRecordInput` 只校验类型/金额/分类，**没有校验 date**；`addRecord`（235 行）与 `updateRecord`（244 行）可写入 `'abc'`、`'2026-13-99'` 等非法日期，直接破坏月度统计与日期过滤。
 
 修复建议：在 `validateRecordInput` 中增加日期校验：
 
@@ -52,13 +52,13 @@ if (date && !DATE_RE.test(String(date))) throw new Error('日期格式必须为 
 
 ### 3. updateRecord 对不存在的记录静默返回 undefined
 
-[db.js](/D:/codex%20code/Accounting%20book/electron/db.js:244)：id 不存在时 `UPDATE` 影响 0 行，随后 `getRecord(id)` 返回 `undefined` 且不报错，渲染层可能把失败当成功。
+[db.js](electron/db.js:244)：id 不存在时 `UPDATE` 影响 0 行，随后 `getRecord(id)` 返回 `undefined` 且不报错，渲染层可能把失败当成功。
 
 修复建议：UPDATE 后检查 `info.changes === 0` 时抛错或返回 `{ ok: false, error: '记录不存在' }`。
 
 ### 4. IPC 未校验调用方 + 清空通道无二次防线
 
-[main.js](/D:/codex%20code/Accounting%20book/electron/main.js:67) 全部 `ipcMain.handle` 未校验 `event.senderFrame`；其中 `data:clearAll`（101 行）是破坏性操作，任何能执行脚本的渲染内容都可直接清空全部记录。本地单窗口应用风险低，但属于标准加固项。
+[main.js](electron/main.js:67) 全部 `ipcMain.handle` 未校验 `event.senderFrame`；其中 `data:clearAll`（101 行）是破坏性操作，任何能执行脚本的渲染内容都可直接清空全部记录。本地单窗口应用风险低，但属于标准加固项。
 
 修复建议：
 - 在 `ipcSafe` 中校验 `event.senderFrame.url` 属于应用自身页面（`file://` 的 dist 路径或开发服务器地址）。
@@ -70,7 +70,7 @@ if (date && !DATE_RE.test(String(date))) throw new Error('日期格式必须为 
 
 ### 6. index.html 缺少 CSP（内容安全策略）
 
-[index.html](/D:/codex%20code/Accounting%20book/index.html) 未配置 Content-Security-Policy，Electron 启动会在控制台告警；若未来加载远程资源，风险上升。修复：增加 CSP meta，例如 `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'`。
+[index.html](index.html) 未配置 Content-Security-Policy，Electron 启动会在控制台告警；若未来加载远程资源，风险上升。修复：增加 CSP meta，例如 `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'`。
 
 ### 7. 注释覆盖率整体 8.8%，明显低于项目目标（约 30%）
 
@@ -80,11 +80,11 @@ comments-check 脚本实测：Vue 视图层多数文件 0%–3%（如 AddView 2.
 
 ### 8. 打包体积偏大（构建产物 2.09MB / gzip 690KB）
 
-[ChartBox.vue](/D:/codex%20code/Accounting%20book/src/components/ChartBox.vue:5) 全量 `import * as echarts`，[main.js](/D:/codex%20code/Accounting%20book/src/main.js) 全量注册 Element Plus；`vite build` 出现 chunk > 500KB 警告。修复：echarts 改用 `echarts/core` 按需注册（饼图/柱状图组件），Element Plus 用 `unplugin-vue-components` + `unplugin-auto-import` 按需引入。
+[ChartBox.vue](src/components/ChartBox.vue:5) 全量 `import * as echarts`，[main.js](src/main.js) 全量注册 Element Plus；`vite build` 出现 chunk > 500KB 警告。修复：echarts 改用 `echarts/core` 按需注册（饼图/柱状图组件），Element Plus 用 `unplugin-vue-components` + `unplugin-auto-import` 按需引入。
 
 ### 9. DashboardView 与 StatsView 存在明显重复代码
 
-两处的 `donutOption` / `barOption` / `maxIdx` ECharts 配置与模板几乎相同（[DashboardView.vue](/D:/codex%20code/Accounting%20book/src/views/DashboardView.vue:35)、[StatsView.vue](/D:/codex%20code/Accounting%20book/src/views/StatsView.vue:22)）。修复：抽取 `src/composables/useStatsCharts.js` 共享图表配置。
+两处的 `donutOption` / `barOption` / `maxIdx` ECharts 配置与模板几乎相同（[DashboardView.vue](src/views/DashboardView.vue:35)、[StatsView.vue](src/views/StatsView.vue:22)）。修复：抽取 `src/composables/useStatsCharts.js` 共享图表配置。
 
 ### 10. main.js 混入测试脚本（低优先级）
 
@@ -92,7 +92,7 @@ comments-check 脚本实测：Vue 视图层多数文件 0%–3%（如 AddView 2.
 
 ### 11. 其它小项
 
-- [App.vue](/D:/codex%20code/Accounting%20book/src/App.vue:51) 硬编码 `v1.3.0`，升级版本时容易漏改（可用构建时注入）。
+- [App.vue](src/App.vue:51) 硬编码 `v1.3.0`，升级版本时容易漏改（可用构建时注入）。
 - RecordsView 的搜索关键字 watch 每次按键即触发查询，建议加 300ms 防抖。
 - 导出默认文件名用 `toISOString()`（UTC 日期），在中国时区可能比本地日期早一天，建议用本地日期。
 - 部分视图 `onMounted` 的异步加载没有 try/catch（AddView、DataView、CategoriesView），IPC 失败会变成未处理的 Promise rejection。

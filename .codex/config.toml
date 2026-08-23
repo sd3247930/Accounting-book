@@ -1,11 +1,14 @@
 # 项目级 Codex 配置：质量门禁第二道防线
 # PreToolUse 钩子拦截 Codex 发起的 git commit，通行证无效时拒绝。
+# 注意：command_windows 用相对路径（相对会话工作目录，通常为项目根目录），
+# 避免把机器特定绝对路径提交进公开仓库；若从子目录启动 Codex 该钩子可能失效，
+# 但 git 侧 pre-commit 钩子（.githooks/）仍会兜底拦截。
 [[hooks.PreToolUse]]
 matcher = "^Bash$"
 
 [[hooks.PreToolUse.hooks]]
 type = "command"
 command = 'node "$(git rev-parse --show-toplevel)/.codex/hooks/pre_tool_use_gate.mjs"'
-command_windows = 'node "D:/codex code/Accounting book/.codex/hooks/pre_tool_use_gate.mjs"'
+command_windows = 'node .codex/hooks/pre_tool_use_gate.mjs'
 timeout = 30
 statusMessage = "检查质量门禁通行证"
